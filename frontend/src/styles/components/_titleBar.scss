@@ -1,0 +1,61 @@
+
+.title-bar {
+    
+    height: $title-bar-size;
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: $grey-lighter;
+    -webkit-app-region: drag;
+
+    overflow: hidden;
+
+    & div {
+        display: inherit;
+    }
+
+    &__menu {
+        -webkit-app-region: no-drag;
+
+        & button {
+            font-size: 1.2rem;
+            color: $grey-darkest;
+            border: none;
+            height: $title-bar-size;
+            width: $title-bar-size;
+            background-color: $grey-lighter;
+
+            &:hover {           
+                background-color: $grey-medium;
+            }
+        }
+    }
+
+    &__controll {
+        -webkit-app-region: no-drag;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: $title-bar-size;
+        width: $title-bar-size+10;
+
+        &:hover {           
+            background-color: $grey-medium;
+        }
+
+        &--close {
+
+            //background-color: royalblue;
+
+            &:hover {           
+                background-color: $red-medium;
+            }
+        }
+    }
+
+    &__icon-controll {
+        height: 10px;
+        width: 10px;
+    }
+}

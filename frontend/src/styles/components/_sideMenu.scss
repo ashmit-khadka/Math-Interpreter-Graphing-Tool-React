@@ -1,0 +1,50 @@
+.side-menu {
+    position: absolute;
+    height: calc(100vh - 50px);
+    width: $side-menu-size;
+    top: 50px;
+    background-color: $grey-lighter;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+    list-style-type: none;
+    overflow: hidden;
+
+    li {
+
+    }
+    &__icon {        
+
+        height: 30px;
+        width: 30px;
+        padding: 15px;
+        background-color: $grey-light;
+        margin: 10px;
+        border-radius: 50%;
+        text-align: center;
+        font-family: 'Lora', serif;
+        font-size: 1.6rem;
+        transition: .2s ease;
+
+        svg {
+            height: 30px;
+            width: 30px;
+    
+        }
+
+        &:hover {
+            transform: scale(1.1);
+            background-color: $grey-medium;
+        }
+
+        &:active {
+            transform: scale(0.9);
+        }
+        
+        &--active {
+            background-color: $grey-medium;
+        }
+    }
+
+}
