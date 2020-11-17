@@ -17,11 +17,14 @@ public class LookupTable
 		Divide = 3,
 		Exponent = 4,
 		Equal = 5,
-		Left_Para = 7,
-		Right_Para = 8,
-		Integer = 9,
-		Float = 10,
-		Varaible = 11
+		Left_Curly = 6,
+		Right_Curly = 7,
+		Left_Para = 8,
+		Right_Para = 9,
+		Integer = 10,
+		Float = 11,
+		Variable = 12,
+		Comma = 13
 	}
 	//DICTIONARY
 
@@ -38,23 +41,53 @@ public class LookupTable
 		{
 			this.type = type;
 			this.value = value;
+			variable = new Var("",false,null);
 		}
 
-		public Tokens type { get; }
-		public Object value { get; }
+		public Symbol(Tokens type, Object value, Var variable)
+		{
+			this.type = type;
+			this.value = value;
+			this.variable = variable;
+		}
+
+		public Tokens type;
+		public Object value;
+		public Var variable;
+
+		public bool IsVar()
+		{
+			return !(this.variable.Value is null);
+		}
+
+		public override string ToString()
+		{
+			if (IsVar())
+			{
+				return type.ToString() + " " + variable;
+			}
+			else
+				return type.ToString() + " " + value.ToString();
+		}
+
 		public struct Var
 		{
 			public Var(string name, bool isPtr, Object value)
 			{
-				this.name = name;
-				this.isPtr = isPtr;
-				this.value = value;
+				this.Name = name;
+				this.IsPtr = isPtr;
+				this.Value = value;
 			}
-			public string name { get; }
-			public bool isPtr { get; set; }
-			public Object value { get; set; }
+			public string Name { get; }
+			public bool IsPtr { get; set; }
+			public Object Value { get; set; }
 
-			public override string ToString() { return name +" "+ value; }
+			public override string ToString() {
+				if (IsPtr)
+					return Name + " is pointer to symbol " + Value;
+				
+				return Name +" "+ Value; 
+			}
 		}
 	}
 }

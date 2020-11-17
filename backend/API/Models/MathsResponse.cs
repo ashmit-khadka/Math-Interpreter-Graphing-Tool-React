@@ -10,6 +10,6 @@ namespace API.Models
     public class MathResponse
     {
         [DataMember(Name = "result")]
-        public int Result { get; set; }
+        public double Result { get; set; }
     }
 }

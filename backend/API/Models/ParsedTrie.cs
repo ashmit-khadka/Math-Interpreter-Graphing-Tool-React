@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using static LookupTable;
+using static LookupTable.Symbol;
 
 public class ParsedTrie
 {
@@ -9,29 +11,28 @@ public class ParsedTrie
 
 	public ParsedTrie()
 	{
-		root = new ParsedTrieNode(0, LookupTable.Tokens.EMPTY, null, -1);
-		id_count = 0;
+		root = new ParsedTrieNode(0, Tokens.EMPTY, null);
 	}
 
 	public void AddNewNode(int depth, Object parentValue, Object value)
 	{
-		if (root.IsLeaf()) { root.children.Add(new ParsedTrieNode(depth, parentValue, value, id_count++)); return; }
+		if (root.IsLeaf()) { root.Children.Add(new ParsedTrieNode(depth, parentValue, value)); return; }
 
-		ArrayList toVisit = new ArrayList(root.children);
+		ArrayList toVisit = new ArrayList(root.Children);
 		ArrayList Visited = new ArrayList();
 		while (toVisit.Count != 0)
 		{
 			ParsedTrieNode node = (ParsedTrieNode)toVisit[0];
-			if (node.value == parentValue && node.depth == depth - 1)
+			if (node.Value == parentValue && node.Depth == depth - 1)
 			{
-				node.children.Add(new ParsedTrieNode(depth, parentValue, value, id_count++));
+				node.Children.Add(new ParsedTrieNode(depth, parentValue, value));
 				return;
 			}
 			else
 			{
 				if (node.IsLeaf() == false)
 				{
-					foreach (ParsedTrieNode toAdd in node.children)
+					foreach (ParsedTrieNode toAdd in node.Children)
 					{
 						if (!Visited.Contains(toAdd))
 							toVisit.Insert(0, toAdd);
@@ -45,7 +46,7 @@ public class ParsedTrie
 
 	public void PrintWidthFirst()
 	{
-		ArrayList toVisit = new ArrayList(root.children);
+		ArrayList toVisit = new ArrayList(root.Children);
 		ArrayList Visited = new ArrayList();
 
 		while (toVisit.Count != 0)
@@ -54,7 +55,7 @@ public class ParsedTrie
 			Console.WriteLine(node);
 			if (node.IsLeaf() == false)
 			{
-				foreach (ParsedTrieNode toAdd in node.children)
+				foreach (ParsedTrieNode toAdd in node.Children)
 				{
 					if (!Visited.Contains(toAdd))
 						toVisit.Add(toAdd);
@@ -62,62 +63,91 @@ public class ParsedTrie
 			}
 			toVisit.Remove(node);
 			Visited.Add(node);
-
 		}
-
-	}
-}
-
-
-
-public class ParsedTrieNode
-{
-	public int depth {get; set;}
-	public Object parent { get; set; }
-	public Object value{ get; set; }
-	public ArrayList children { get; set; }
-	public int id { get; set; }
-
-	public ParsedTrieNode(int depth, Object parent, Object value, int id)
-	{
-		this.depth = depth;
-		this.parent = parent;
-		this.value = value;
-		this.id = id;
-		this.children = new ArrayList();
 	}
 
-	public bool IsLeaf() { return this.children.Count == 0 ;  }
-
-	public ParsedTrieNode FindChild(Object value) 
+	public void PrintDepthFirst()
 	{
-		foreach(ParsedTrieNode child in children)
+		ArrayList toVisit = new ArrayList(root.Children);
+		ArrayList Visited = new ArrayList();
+		ArrayList AddList = new ArrayList();
+
+		while (toVisit.Count != 0)
 		{
-			if (child.value == value)
+			ParsedTrieNode node = (ParsedTrieNode)toVisit[0];
+			Console.WriteLine(node);
+			if (node.IsLeaf() == false)
 			{
-				return child;
+				foreach (ParsedTrieNode toAdd in node.Children)
+				{
+					if (!Visited.Contains(toAdd))
+						AddList.Add(toAdd);
+				}
 			}
+			toVisit.Remove(node);
+			toVisit.InsertRange(0, AddList);
+			AddList.Reverse();
+			Visited.Add(node);
+			AddList.Clear();
 		}
-		return null;
+
 	}
 
-	public bool RemoveChild(Object value)
+
+
+	public class ParsedTrieNode
 	{
-		foreach (ParsedTrieNode child in children)
+		public int Depth { get; set; }
+		public Object Parent { get; set; }
+		public Object Value { get; set; }
+		public ArrayList Children { get; set; }
+
+		public ParsedTrieNode(int depth, Object parent, Object value)
 		{
-			if (child.value == value)
-			{
-				children.Remove(child);
-				return true;
-			}
+			this.Depth = depth;
+			this.Parent = parent;
+			this.Value = value;
+			this.Children = new ArrayList();
 		}
-		return false;
-	}
 
-	public override string ToString()
-	{
-		return this.id + "->" + this.value.ToString();
-	}
+		public bool IsLeaf() { return this.Children.Count == 0; }
 
+		public ParsedTrieNode FindChild(Object value)
+		{
+			foreach (ParsedTrieNode child in Children)
+			{
+				if (child.Value == value)
+				{
+					return child;
+				}
+			}
+			return null;
+		}
+
+		/*
+		public bool RemoveChild(Object value)
+		{
+			foreach (ParsedTrieNode child in children)
+			{
+				if (child.value == value)
+				{
+					children.Remove(child);
+					return true;
+				}
+			}
+			return false;
+		}
+		*/
+
+		public override string ToString()
+		{
+			return this.Depth + " " + this.Value.ToString();
+		}
+
+		public bool IsString()
+		{
+			return this.Value is string;
+		}
+	}
 }
 

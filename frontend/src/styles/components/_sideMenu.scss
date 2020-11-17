@@ -15,7 +15,7 @@
 
     }
     &__icon {        
-
+        position: relative;
         height: 30px;
         width: 30px;
         padding: 15px;
@@ -26,11 +26,22 @@
         font-family: 'Lora', serif;
         font-size: 1.6rem;
         transition: .2s ease;
+        text-decoration: none;
 
         svg {
             height: 30px;
-            width: 30px;
-    
+            width: 30px;    
+        }
+
+        div {
+            position: absolute;
+            background-color: rgb(188, 209, 146);
+            color: black;
+            border-radius: 50%;
+            padding: 5px;
+            right: 0px;
+            height: 10px;
+            width: 10px;
         }
 
         &:hover {
@@ -44,6 +55,10 @@
         
         &--active {
             background-color: $grey-medium;
+            &:hover {
+                transform: scale(1);
+            }
+    
         }
     }
 

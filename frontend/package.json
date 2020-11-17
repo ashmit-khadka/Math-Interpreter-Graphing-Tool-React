@@ -12,14 +12,18 @@
     "d3": "^6.2.0",
     "d3-axis": "^2.0.0",
     "d3-scale": "^3.2.3",
+    "d3-selection": "^2.0.0",
     "electron-is-dev": "^1.2.0",
     "node-sass": "^4.14.1",
     "react": "^16.13.1",
+    "react-color": "^2.19.3",
     "react-dom": "^16.13.1",
     "react-hook-form": "^6.9.6",
     "react-mathjax": "^1.0.1",
+    "react-redux": "^7.2.2",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "3.4.3"
+    "react-scripts": "3.4.3",
+    "redux": "^4.0.5"
   },
   "scripts": {
     "react-start": "react-scripts start",

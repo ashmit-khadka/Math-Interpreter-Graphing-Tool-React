@@ -11,6 +11,7 @@ namespace API.Controllers
     public class MathController : ApiController
     {
         // GET: api/Math
+        /*
         public MathResponse Get(string equation)
         {
 
@@ -20,6 +21,19 @@ namespace API.Controllers
             };
             return response;
         }
+        */
+
+        public MathResponse Get(string problem)
+        {
+
+            var response = new MathResponse
+            {
+                Result = Interpreter.Interpreter.Calc(problem)
+            };
+
+            return response;
+        }
+
 
         // GET: api/Math/5
         public string Get(int id)

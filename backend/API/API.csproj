@@ -220,7 +220,7 @@
     <Compile Include="Models\Interpreter.cs" />
     <Compile Include="Models\Lexer.cs" />
     <Compile Include="Models\LookupTable.cs" />
-    <Compile Include="Models\MathResponse.cs" />
+    <Compile Include="Models\MathsResponse.cs" />
     <Compile Include="Models\ParsedTrie.cs" />
     <Compile Include="Models\Parser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
