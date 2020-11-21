@@ -43,39 +43,6 @@ public class ParsedTrie
 		}
 	}
 
-	public ParsedTrie ParseToAST(){
-	ArrayList toVisit = new ArrayList(this.root.children);
-	ArrayList Visited = new ArrayList();
-	ArrayList AddList = new ArrayList();
-	while (toVisit.Count != 0)
-	{
-		ParsedTrieNode parent = this.root;
-		ParsedTrieNode node = (ParsedTrieNode)toVisit[0];
-		
-		if (node.depth != parent.depth)
-		{
-			parent = node;
-		}
-
-
-		if (node.IsLeaf() == false && node.value is string)
-		{
-			parent.RemoveChild(node);
-			foreach (ParsedTrieNode toAdd in node.children)
-			{
-				if (!Visited.Contains(toAdd))
-					AddList.Add(toAdd);
-			}
-		}
-		toVisit.Remove(node);
-		toVisit.InsertRange(0, AddList);
-		parent.children.InsertRange(0, AddList);
-		Visited.Add(node);
-		AddList.Clear();
-		}
-		return null;
-	}
-
 
 	public void PrintWidthFirst()
 	{
