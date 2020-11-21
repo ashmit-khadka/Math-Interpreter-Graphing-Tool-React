@@ -54,14 +54,14 @@ public class Executor
 
 		while (count < lt.symbols.Length)
 		{
-			switch (lt.symbols[count].type)
+			switch (lt.getSymbol(count).type)
 			{
 				case Integer:
-					Numbers.Push(lt.symbols[count++].value);
+					Numbers.Push(lt.getSymbol(count++).value);
 					break;
 
 				case Float:
-					Numbers.Push(lt.symbols[count++].value);
+					Numbers.Push(lt.getSymbol(count++).value);
 					break;
 
 				case Equal:
@@ -74,7 +74,7 @@ public class Executor
 					{
 						Calculate();
 					}
-					Operators.Push(lt.symbols[count++].type);
+					Operators.Push(lt.getSymbol(count++).type);
 					break;
 
 				case Minus:
@@ -82,7 +82,7 @@ public class Executor
 					{
 						Calculate();
 					}
-					Operators.Push(lt.symbols[count++].type);
+					Operators.Push(lt.getSymbol(count++).type);
 					break;
 
 				case Exponent:
@@ -90,7 +90,7 @@ public class Executor
 					{
 						Calculate();
 					}
-					Operators.Push(lt.symbols[count++].type);
+					Operators.Push(lt.getSymbol(count++).type);
 					break;
 
 
@@ -100,7 +100,7 @@ public class Executor
 					{
 						Calculate();
 					}
-					Operators.Push(lt.symbols[count++].type);
+					Operators.Push(lt.getSymbol(count++).type);
 					break;
 
 				case Divide:
@@ -109,11 +109,11 @@ public class Executor
 					{
 						Calculate();
 					}
-					Operators.Push(lt.symbols[count++].type);
+					Operators.Push(lt.getSymbol(count++).type);
 					break;
 
 				case Left_Para:
-					Operators.Push(lt.symbols[count++].type);
+					Operators.Push(lt.getSymbol(count++).type);
 					break;
 
 				case Right_Para:
