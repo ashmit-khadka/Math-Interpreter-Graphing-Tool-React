@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 public class LookupTable
 {
@@ -17,22 +18,44 @@ public class LookupTable
 		Divide = 3,
 		Exponent = 4,
 		Equal = 5,
-		Left_Curly = 6,
-		Right_Curly = 7,
-		Left_Para = 8,
-		Right_Para = 9,
-		Integer = 10,
-		Float = 11,
-		Variable = 12,
-		Comma = 13
+		Left_Para = 7,
+		Right_Para = 8,
+		Integer = 9,
+		Float = 10,
+		Varaible = 11
 	}
-	//DICTIONARY
 
 	public Symbol[] symbols;
+	public Dictionary<String, Var> variables;
 
 	public LookupTable(int MAX_TOKENS)
 	{
-		symbols = new Symbol[MAX_TOKENS]; //remake to support variable pointers!
+		symbols = new Symbol[MAX_TOKENS]; 
+		Dictionary<String, Var> variables = new Dictionary<string, Var>();
+	}
+
+	public void addSymbol(int index, Tokens type, Object value){
+		symbols[index] = new Symbol(type,value);
+	}
+
+	public void resetSymbols(int len){
+		symbols = new Symbol[len];
+	}
+
+	public Symbol getSymbol(int index){
+		return symbols[index];
+	}
+
+	public void addToVariables(string key, Var value){
+		variables.Add(key, value);
+	}
+
+	public void clearVariables(){
+		variables.Clear();
+	}
+
+	public bool variableExist(string key){
+		return variables.ContainsKey(key);
 	}
 
 	public struct Symbol
@@ -41,53 +64,21 @@ public class LookupTable
 		{
 			this.type = type;
 			this.value = value;
-			variable = new Var("",false,null);
 		}
 
-		public Symbol(Tokens type, Object value, Var variable)
+		public Tokens type { get; }
+		public Object value { get; }
+	}
+	public struct Var
 		{
-			this.type = type;
-			this.value = value;
-			this.variable = variable;
-		}
-
-		public Tokens type;
-		public Object value;
-		public Var variable;
-
-		public bool IsVar()
-		{
-			return !(this.variable.Value is null);
-		}
-
-		public override string ToString()
-		{
-			if (IsVar())
+			public Var(bool isPtr, Object value)
 			{
-				return type.ToString() + " " + variable;
+				this.isPtr = isPtr;
+				this.value = value;
 			}
-			else
-				return type.ToString() + " " + value.ToString();
-		}
+			public bool isPtr { get; set; }
+			public Object value { get; set; }
 
-		public struct Var
-		{
-			public Var(string name, bool isPtr, Object value)
-			{
-				this.Name = name;
-				this.IsPtr = isPtr;
-				this.Value = value;
-			}
-			public string Name { get; }
-			public bool IsPtr { get; set; }
-			public Object Value { get; set; }
-
-			public override string ToString() {
-				if (IsPtr)
-					return Name + " is pointer to symbol " + Value;
-				
-				return Name +" "+ Value; 
-			}
-		}
+			public override string ToString() { return isPtr.ToString() + value.ToString() ; }
 	}
 }
