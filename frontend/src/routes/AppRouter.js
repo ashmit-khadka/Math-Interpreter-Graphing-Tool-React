@@ -7,6 +7,8 @@ import CalculatorScreen from '../components/CalculatorScreen'
 import TitleBar from '../components/TitleBar'
 import SideMenu from '../components/SideMenu'
 import GraphScreen from '../components/screens/GraphScreen'
+import RegressionScreen from '../components/screens/RegressionScreen'
+import TestScreen from '../components/screens/TestScreen'
 import Graph from '../components/Graph'
 import GraphB from '../components/GraphB'
 
@@ -21,7 +23,8 @@ const AppRouter = () => {
                     <Route path='/' component={Home} exact={true}/>
                     <Route path='/calculator' component={CalculatorScreen} exact={true}/>
                     <Route path='/graph' component={GraphScreen} exact={true}/>
-                    <Route path='/test' component={Graph} exact={true}/>
+                    <Route path='/regression' component={RegressionScreen} exact={true}/>
+                    <Route path='/test' component={TestScreen} exact={true}/>
                 </Switch>
             </div>
 

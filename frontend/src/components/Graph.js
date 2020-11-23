@@ -48,6 +48,7 @@ import {
 
     const svgRef = useRef()
     
+    //console.log('lines', props.lines.length)
     
     let data = [
         {
@@ -67,30 +68,16 @@ import {
         }
     ]
 
-    //data = props.data
-
     for(let i=-(50); i<=50; i++) {
         for(let j=0; j<data.length; j++){
             data[j].data.push(Math.pow(i, 2)-10)
         }
     }
 
-    /*
-    let data = []
-    for(let i=-(50); i<=50; i++) {
-            data.push(Math.pow(i, 2)-10)
-        
-    }
-    */
-
-    const [lines, setLines] = useState([])
-
-
-    //console.log(graphWidth)
     
     useEffect(() => {
         createGraph()
-    }, [scale, dimensions, domainOffset])
+    }, [scale, dimensions, domainOffset, props.lines])
 
 
     
@@ -108,19 +95,6 @@ import {
 
     })
     
-    //console.log(dimensions)
-
-    const findMin = a => {
-        //console.log(a)
-        let minimum = Math.abs(a[0])
-        a.forEach(element => {
-            const abs = Math.abs(element)
-            //console.log(element)
-            if (abs > minimum) minimum = abs 
-        });
-        return minimum
-    }
-
 
     const createGraph = () => {
 
@@ -154,19 +128,17 @@ import {
             else if (XAxisOrigin <= 0) return 0
             return XAxisOrigin
         }
-
         const createXaxis = () => {
             if (YAxisOrigin >= graphHeight) return axisTop(xScale).ticks(10) 
             return axisBottom(xScale).ticks(10)
         }
-
         const createYaxis = () => {
             if (XAxisOrigin <= 0) return axisRight(yScale).ticks(10) 
             return axisLeft(yScale).ticks(10)
         }
-
    
         const svg = select(svgRef.current);
+        svg.selectAll("path").remove();
 
         //Create axis'
         const xAxis = createXaxis()
@@ -183,9 +155,6 @@ import {
           .call(yAxis)
           //.style("transform", `translate(${((dimensions.width-100)/2) + domainOffset.x}px, ${domainOffset.y}px)`)
 
-          //console.log(`scale:${scale} x origin:${XAxisOrigin} y origin:${YAxisOrigin}`)
-            //console.log(`x range: ${(-10+domainOffset.x*scale)} to ${(10+domainOffset.x*scale)}`)
-
         //Create gridlines
         const xAxisGrid = axisBottom(xScale).tickSize(-dimensions.height).tickFormat('').ticks(50);
         const yAxisGrid = axisRight(yScale).tickSize(-dimensions.width).tickFormat('').ticks(50);
@@ -198,28 +167,24 @@ import {
             .call(yAxisGrid)
             .style("transform", `translateX(${dimensions.width}px`)
             //.style("transform", `translate(${dimensions.width + domainOffset.x}px, ${domainOffset.y}px)`)
-
-        // generates the "d" attribute of a path element
-
-        
+    
         const myLine = line()
             .x((value, index) => xScale(index-50))
             .y(yScale)
             .curve(curveCardinal);
         // renders path element, and attaches
-        // the "d" attribute from line generator above
-            
-        for(let i=0; i<data.length; i++){
+        // the "d" attribute from line generator above       
+
+        for(let i=0; i<props.lines.length; i++){
             const name = i==0?'':i
-            //console.log(name)
+            //console.log(`rgba(${props.lines[i].colour.r}, ${props.lines[i].colour.g}, ${props.lines[i].colour.b}, ${props.lines[i].colour.a})`)
             svg
-                .selectAll(`.line${name}`)
-                .data([data[i].data])
-                .join("path")
+                .append("path")
+                .data([props.lines[i].data])
                 .attr("class", "line")
                 .attr("d", myLine)
-                .attr("fill", "none")  
-                .enter()          
+                .attr("fill", "none")
+                .attr("stroke", `rgba(${props.lines[i].colour.r}, ${props.lines[i].colour.g}, ${props.lines[i].colour.b}, ${props.lines[i].colour.a})`)
         }
         
         //.attr("stroke", `rgba(${data[i].colour.r}, ${data[i].colour.g}, ${data[i].colour.b}, ${data[i].colour.a})`)

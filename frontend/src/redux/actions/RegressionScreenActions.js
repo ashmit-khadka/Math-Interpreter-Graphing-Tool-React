@@ -1,22 +1,22 @@
 //increment action for LineItems reducer.
-export const increment = (LineItem) => {
+export const add = (LineItem) => {
     return {
-        type:'INCREMENT',
+        type:'ADD',
         payload: LineItem
     }
 }
 
-export const decrement = (LineItemID) => {
+export const remove = (LineItemID) => {
     return {
-        type:'DECREMENT',
+        type:'REMOVE',
         payload: LineItemID
     }
 }
 
-//data = {id, colour}
-export const updateColour = (data) => {
+//data = {x, y}
+export const updateCoordinate = (data) => {
     return {
-        type:'UPDATE_COLOUR',
+        type:'UPDATE_COORDINATE',
         payload: data
     }
 }

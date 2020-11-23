@@ -16,7 +16,13 @@
         }
     
         &__axis-grid  line {
-            stroke: rgb(219, 219, 219);
+            z-index: 3;
+            stroke: rgb(225, 225, 225);
+            stroke-width: 0.1rem;
+        }
+        &__axis-grid-point  line {
+            z-index: 3;
+            stroke: rgb(200, 200, 200);
             stroke-width: 0.1rem;
         }
     }
@@ -39,7 +45,7 @@
 
 
 .line {
-    stroke: #ef9a9a;
+    //stroke: #ef9a9a;
     stroke-width: 0.2rem;
 }
 
@@ -144,3 +150,24 @@
     height: 100%;
 
 }
+
+.graph-point {
+    fill: rgb(206, 46, 46);
+}
+
+.testSVG {
+    display: block;
+    width: 600px;
+    height: 600px;
+    background: #ffffff;
+    overflow: hidden;
+  }
+  
+.myLine {
+    z-index: 5;
+}
+
+  svg rect.selection {
+    stroke: none;
+  }
+  

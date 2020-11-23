@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Graph from '../Graph';
+import GraphB from '../GraphB';
 import LineItem from '../LineItem'
 import { ReactComponent as IconAdd} from '../../assets/icons/add.svg'
 import { useSelector, useDispatch } from 'react-redux';
@@ -7,23 +8,22 @@ import { increment } from '../../redux/actions/LineItemActions'
 
 let lineID = 0
 
-const GraphScreen = () => {    
+const TestScreen = () => {    
 
 
-    const [lines, setLines] = useState([])
     //const [lineItems, setLineItems] = useState([])
     const LineItems = useSelector(state => state.LineItemReducer) 
     const dispatch = useDispatch()
 
     const randomRGBA = () => {
         return {
-            r: Math.floor(Math.random() * 255) + 1,
-            g: Math.floor(Math.random() * 255) + 1,
-            b: Math.floor(Math.random() * 255) + 1, 
+            r: Math.floor(Math.random() * 255) + 50,
+            g: Math.floor(Math.random() * 255) + 50,
+            b: Math.floor(Math.random() * 255) + 50, 
             a: 1 
         }
     }
-
+    
     const createEquation = () => {
         return {
             exponent: Math.floor(Math.random() * 4) + 0,
@@ -31,57 +31,38 @@ const GraphScreen = () => {
         }
     }
 
-    //updates/syncs lines for the graph based on LineItems.
-    const updateLines = () => {
-        console.log('updating..')
-        let data = []
-        LineItems.map(LineItem => {
-            data.push({
-                id: LineItem.props.id,
-                colour: LineItem.props.colour,
-                data: LineItem.props.data
-            })            
-        }) 
-        setLines(data);
-    } 
+    //console.log('rendering..')
 
-    
+        
     const addItem = () => {
 
         const colour = randomRGBA()
         const eq = createEquation()
         const equation = `x^${eq.exponent}${eq.c < 0 ? eq.c : '+' + eq.c}`
         const data = []
-        for(let i=-(50); i<=50; i++) {
-            data.push(Math.pow(i, eq.exponent) - eq.c)
+        
+        for(let i=-(5000); i<=5000; i++) {
+            data.push({x: i, y: Math.pow(i, eq.exponent) + eq.c})
         }
 
-        dispatch(increment(<LineItem key={++lineID} id={lineID} equation={equation} data={data} colour={colour} update={updateLines}/>))
+        //dispatch(increment(<LineItem key={++lineID} id={lineID} equation={equation} data={data} colour={colour} update={updateLines}/>))
 
-        LineItems.map(LineItem => {
-            //console.log(LineItem.props.colour)
-        })
-
-        
-        setLines([...lines, {            
-            id: lineID,
-            colour: {r: colour.r, g: colour.g, b: colour.b, a: colour.a},
-            data: data        
-        }])
-
-        //console.log('lines', lines)
+        dispatch(increment({
+            id: ++lineID,
+            data: data,
+            equation: equation,
+            colour: colour,
+            visible: true
+        }))
     }
     
     useEffect(() => {
-        //addItem()
+        addItem()
     }, [])
 
     useEffect(() => {
-        console.log('update lines..')
-        updateLines()
+        //console.log('..........')
     }, [LineItems])
-
-
 
 
     return (
@@ -89,15 +70,16 @@ const GraphScreen = () => {
             <div className="graph-screen__panel">
                 <button className='user-input--button' onClick={addItem}>New Line<IconAdd/></button>                
                 <hr className="divider"></hr>
-
-                {LineItems.map(item => item)}
+                {LineItems.map(item => {
+                    return <LineItem key={item.id} id={item.id} equation={item.equation} data={item.data} colour={item.colour} visible={item.visible}/>
+                })}
             </div>
             <div className="graph-screen__graph">
-                <Graph lines={lines}/>
+                <GraphB lines={LineItems}/>
             </div>
 
         </div>
     )
 }
 
-export default GraphScreen
+export default TestScreen

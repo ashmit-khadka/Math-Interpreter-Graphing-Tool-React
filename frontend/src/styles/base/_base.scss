@@ -3,8 +3,9 @@
     padding: 0;
     font-size: 62.5%;
     font-family: 'Opne Sans', sans-serif;
-    transition: .2s ease;
-
+    font-size: .9rem;
+    //transition: .2s ease;
+    
 
 }
 
@@ -40,3 +41,23 @@
     }
 }
 
+.flex-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+
+.divider {
+    height: 1px;
+    width: 90%;
+    margin: 20px auto 10px;
+    background-color: rgb(206, 206, 206);
+    border: none;
+
+}
+
+.input-text {
+    border: none;
+    outline: none;
+}

@@ -1,205 +1,198 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { useForm } from "react-hook-form"
-import axios from 'axios'
-//import { curveCardinal, values } from 'd3';
+import React, { useRef, useEffect, useState } from "react";
 import {
-    select,
-    line,
-    curveCardinal,
-    axisTop,
-    axisBottom,
-    axisLeft,
-    axisRight,
-    scaleLinear,
-    gray,
-    mouse,
-    drag
-  } from "d3";
-  
-  import { ReactComponent as IconArrowUp} from '../assets/icons/controls/arrow-up.svg'
-  import { ReactComponent as IconArrowDown} from '../assets/icons/controls/arrow-down.svg'
-  import { ReactComponent as IconArrowLeft} from '../assets/icons/controls/arrow-left.svg'
-  import { ReactComponent as IconArrowRight} from '../assets/icons/controls/arrow-right.svg'
+  select,
+  scaleLinear,
+  line,
+  max,
+  curveCardinal,
+  axisTop,
+  axisBottom,
+  axisLeft,
+  axisRight,
+  zoom,
+  zoomTransform
+} from "d3";
 
+const data = Array.from({ length: 50 }, () => Math.round(Math.random() * 100))
 
-  var resizeTimer;
-
-  const Line = () => {
-      return (
-          <div>
-
-          </div>
-      )
-  }
-
-  const Graph = () => {
-
-    const [scale, setScale] = useState(1)
+const Graph = (props) => {
+    const svgRef = useRef();
+    const wrapperRef = useRef();
+    const [currentZoomState, setCurrentZoomState] = useState();
     const [dimensions, setDimensions] = useState({
         height: window.innerHeight,
         width: window.innerWidth
     })
 
-    const [domainOffset, setDomainOffset] = useState({
-        x: 0,
-        y: 0
-    })
-
-    const svgRef = useRef()
-    
-    const data = [
-        {
-            id: 1,
-            colour: {r: 245, g: 66, b: 66, a: 1},
-            data: []
-        },
-        {
-            id: 2,
-            colour: {r: 45, g: 66, b: 66, a: 1},
-            data: []
-        }
-    ]
-
-    const [lines, setLines] = useState([])
-
-
-    //console.log(graphWidth)
-    
+    //console.log(props.lines)
+    // will be called initially and on every data change
     useEffect(() => {
+
         createGraph()
-    }, [scale, dimensions, domainOffset])
+
+    }, [currentZoomState, data, props.lines]);
 
     const createGraph = () => {
 
-        const graphHeight = document.getElementById("graph").clientHeight
-        const graphWidth = document.getElementById("graph").clientWidth
-
-        //Create scales
-        //maps the relation of domain to range (e.g. 6 items to 500px)
+        const svg = select(svgRef.current);
+        const svgContent = svg.select(".content");
+        const width = 600 //window.innerWidth
+        const height = 600 //window.innerHeight
+    
+    
+        // scales + line generator
         const xScale = scaleLinear()
-          .domain(([((-10+domainOffset.x)*scale), ((10+domainOffset.x)*scale)]))
-          .range([0, graphWidth]);
+            .domain([-(data.length), data.length])
+            .range([0, width - 10]);
     
         const yScale = scaleLinear()
-          .domain([((-10+domainOffset.y)*scale), ((10+domainOffset.y)*scale)])
-          .range([graphHeight, 0]);
-
-        //Where in the pixel range, origin of X and Y should be.
-        const XAxisOrigin = xScale(0) //5 needs to be a scalled value.
-        const YAxisOrigin = yScale(0) //5 needs to be a scalled value.
-
+            .domain([-(max(data)), max(data)])
+            .range([height, 0]);
+    
+    
+        let XAxisPos = xScale(0) //5 needs to be a scalled value.
+        let YAxisPos = yScale(0) //5 needs to be a scalled value.
+    
         //Insures X and Y axis do not go out of range.
-        const calcXAxisPos = () => {
+        const calcXAxisPos = (YAxisOrigin) => {
             //console.log(YAxisPos)
-            if (YAxisOrigin >= graphHeight) return graphHeight
+            if (YAxisOrigin >= height) return height
             else if (YAxisOrigin <= 0) return 0
             return YAxisOrigin
         }
-        const calcYAxisPos = () => {
+        const calcYAxisPos = (XAxisOrigin) => {
             //console.log(YAxisPos)
-            if (XAxisOrigin >= graphWidth) return graphWidth
+            if (XAxisOrigin >= width) return width
             else if (XAxisOrigin <= 0) return 0
             return XAxisOrigin
         }
-
-        const createXaxis = () => {
-            if (YAxisOrigin >= graphHeight) return axisTop(xScale).ticks(10) 
+    
+        const createXaxis = (xScale) => {
+            if (XAxisPos >= height) return axisTop(xScale).ticks(10) 
             return axisBottom(xScale).ticks(10)
         }
-
-        const createYaxis = () => {
-            if (XAxisOrigin <= 0) return axisRight(yScale).ticks(10) 
+    
+        const createYaxis = (yScale) => {
+            if (YAxisPos <= 0) return axisRight(yScale).ticks(10) 
             return axisLeft(yScale).ticks(10)
         }
-
-   
-        const svg = select(svgRef.current);
-
-        //Create axis'
-        const xAxis = createXaxis()
-        svg
-          .select("#x-axis")
-          .style("transform", `translateY(${calcXAxisPos()}px)`)
-          .call(xAxis)
-          //.style("transform", `translate(${domainOffset.x}px, ${((dimensions.height-100)/2) + domainOffset.y}px)`)
     
-        const yAxis = createYaxis()
-        svg
-          .select("#y-axis")
-          .style("transform", `translateX(${calcYAxisPos()}px)`)
-          .call(yAxis)
-          //.style("transform", `translate(${((dimensions.width-100)/2) + domainOffset.x}px, ${domainOffset.y}px)`)
+    
+    
+        if (currentZoomState) {
+            const newXScale = currentZoomState.rescaleX(xScale);
+            const newYScale = currentZoomState.rescaleY(yScale);
+    
+            XAxisPos = calcXAxisPos(newYScale(0))
+            YAxisPos = calcYAxisPos(newXScale(0))
+            //console.log(`x axis pos: ${XAxisPos}, y axis pos: ${YAxisPos}`)
+    
+            xScale.domain(newXScale.domain());
+            yScale.domain(newYScale.domain());
+        }    
+    
+        const lineGenerator = line()
+            .x(d => xScale(d.x))
+            .y(d => yScale(d.y))
+            .curve(curveCardinal);
 
-          console.log(`scale:${scale} x origin:${XAxisOrigin} y origin:${YAxisOrigin}`)
-            console.log(`x range: ${(-10+domainOffset.x*scale)} to ${(10+domainOffset.x*scale)}`)
+       if (props.lines) {
+            svgContent.selectAll("path").remove();        
+            for(let i=0; i<props.lines.length; i++){
 
-        //Create gridlines
-        const xAxisGrid = axisBottom(xScale).tickSize(-dimensions.height).tickFormat('').ticks(50);
-        const yAxisGrid = axisRight(yScale).tickSize(-dimensions.width).tickFormat('').ticks(50);
-        svg.select("#x-axis-grid")
-            .call(xAxisGrid)
-            .style("transform", `translateY(${dimensions.height}px`)
-            //.style("transform", `translate(${domainOffset.x}px, ${dimensions.height + domainOffset.y}px)`)
+                if (props.lines[i].visible) {
+                    svgContent
+                        .append("path")
+                        .data([props.lines[i].data])
+                        .attr("class", "line")
+                        .attr("fill", "none")
+                        .attr("stroke", `rgba(${props.lines[i].colour.r}, ${props.lines[i].colour.g}, ${props.lines[i].colour.b}, ${props.lines[i].colour.a})`)
+                        .attr("d", lineGenerator)
+                }
+            }
+        }
 
-        svg.select("#y-axis-grid")
-            .call(yAxisGrid)
-            .style("transform", `translateX(${dimensions.width}px`)
-            //.style("transform", `translate(${dimensions.width + domainOffset.x}px, ${domainOffset.y}px)`)
-
-        // generates the "d" attribute of a path element
-
-
-        for(let i=-(50); i<=50; i++) {
-            data[0].data.push(Math.pow(i, 2)-10)
-            data[1].data.push(i+2)
+        if (props.points) {
+            svgContent.selectAll("circle").remove();
+            for(let i=0; i<props.points.length; i++){
+                svgContent
+                    .selectAll("dot")
+                    .data(data)
+                    .enter().append("circle")
+                    .attr("class", "graph-point")
+                    .attr("r", 5)
+                    .attr("cx", function(d) { return xScale(props.points[i].value.x); })
+                    .attr("cy", function(d) { return yScale(props.points[i].value.y); })            
+            }    
         }
         
-        const myLine = line()
-          .x((value, index) => xScale(index-50))
-          .y(yScale)
-          .curve(curveCardinal);
     
-        // renders path element, and attaches
-        // the "d" attribute from line generator above
+        // axes
+        const xAxis = createXaxis(xScale);
+        svg
+            .select(".x-axis")
+            .style("transform", `translateY(${XAxisPos}px)`)
+            .call(xAxis);
+    
+        const yAxis = createYaxis(yScale);
+        svg
+            .select(".y-axis")
+            .style("transform", `translateX(${YAxisPos}px)`)
+            .call(yAxis);
+    
+        //Create gridlines
+        const xAxisGrid = axisBottom(xScale).tickSize(-height).tickFormat('').ticks(50);
+        const yAxisGrid = axisRight(yScale).tickSize(-width).tickFormat('').ticks(50);
+        svg.select("#x-axis-grid")
+            .call(xAxisGrid)
+            .style("transform", `translateY(${height}px`)
+            //.style("transform", `translate(${domainOffset.x}px, ${dimensions.height + domainOffset.y}px)`)
+    
+        svg.select("#y-axis-grid")
+            .call(yAxisGrid)
+            .style("transform", `translateX(${width}px`)
+            //.style("transform", `translate(${dimensions.width + domainOffset.x}px, ${domainOffset.y}px)`)
+    
+        //Create point gridlines
+        const xAxisGridPoint = axisBottom(xScale).tickSize(-height).tickFormat('').ticks(10);
+        const yAxisGridPoint = axisRight(yScale).tickSize(-width).tickFormat('').ticks(10);
+        svg.select("#x-axis-point-grid")
+            .call(xAxisGridPoint)
+            .style("transform", `translateY(${height}px`)
+            //.style("transform", `translate(${domainOffset.x}px, ${dimensions.height + domainOffset.y}px)`)
+    
+        svg.select("#y-axis-point-grid")
+            .call(yAxisGridPoint)
+            .style("transform", `translateX(${width}px`)
+            //.style("transform", `translate(${dimensions.width + domainOffset.x}px, ${domainOffset.y}px)`)
+    
+        // zoom
+        const zoomBehavior = zoom()
+            .scaleExtent([0.05, 30])
+            .translateExtent([
+            [0, 0],
+            [width, height]
+            ])
+            .on("zoom", () => {
+            const zoomState = zoomTransform(svg.node());
+            setCurrentZoomState(zoomState);
+            });
+    
+        svg.call(zoomBehavior);  
 
-        for(let i=0; i<data.length; i++){
-            svg
-                .selectAll(`.line${data[i].id}`)
-                .data([data[i].data])
-                .join("path")
-                //.attr("class", "line")
-                .attr("d", myLine)
-                .attr("fill", "none")
-                .attr("stroke", `rgba(${data[i].colour.r}, ${data[i].colour.g}, ${data[i].colour.b}, ${data[i].colour.a})`)
-  
-        }
-          //.style("transform", `translate(${domainOffset.x}px, ${domainOffset.y}px)`)
     }
 
     return (
-        <div id="graph" className='graph'>
-            <div className='graph-control graph-control__zoom'>
-                <button className='graph-control--button graph-control--zoom-in' onClick={() => {setScale(scale-1)}}>+</button>
-                <button className='graph-control--button graph-control--zoom-out'onClick={() => {setScale(scale+1)}}>-</button>
-            </div>
-            <div className='graph-control graph-control__move'>
-                <button name="up" className='graph-control--button graph-control--up' onClick={() => {setDomainOffset({x:domainOffset.x, y:domainOffset.y+1})}}><IconArrowUp/></button>
-                <button name="down" className='graph-control--button graph-control--down' onClick={() => {setDomainOffset({x:domainOffset.x, y:domainOffset.y-1})}}><IconArrowDown/></button>
-                <button name="left" className='graph-control--button graph-control--left' onClick={() => {setDomainOffset({x:domainOffset.x-1, y:domainOffset.y})}}><IconArrowLeft/></button>
-                <button name="right" className='graph-control--button graph-control--right' onClick={() => {setDomainOffset({x:domainOffset.x+1, y:domainOffset.y})}}><IconArrowRight/></button>
-            </div>
-            <svg className="graph__svg" ref={svgRef}>
+        <div ref={wrapperRef}>
+            <svg ref={svgRef} className="testSVG">
                 <g id="x-axis-grid" className="graph__svg__axis-grid" />
                 <g id="y-axis-grid" className="graph__svg__axis-grid" />
-                <g id="x-axis" className="graph__svg__axis" />
-                <g id="y-axis" className="graph__svg__axis" />
+                <g id="x-axis-point-grid" className="graph__svg__axis-grid-point" />
+                <g id="y-axis-point-grid" className="graph__svg__axis-grid-point" />
+                <g className="x-axis" />
+                <g className="y-axis" />
+                <g className="content" clipPath={`url(#${''})`}></g>
             </svg>
-            <div className='graph__info'>
-                <span>{`Scale: ${scale}`}</span>
-                <span>{`X: ${domainOffset.x}px`}</span>
-                <span>{`Y: ${domainOffset.y}px`}</span>
-            </div>
-
         </div>
     )
 }
