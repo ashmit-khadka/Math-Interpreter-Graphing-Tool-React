@@ -7,6 +7,7 @@ import { ReactComponent as IconCalculator} from '../assets/icons/calculator.svg'
 import { ReactComponent as IconRegression} from '../assets/icons/regression.svg'
 import { ReactComponent as IconGaussian} from '../assets/icons/gaussian-function.svg'
 import { ReactComponent as IconChart} from '../assets/icons/line-chart.svg'
+import { ReactComponent as IconSettings} from '../assets/icons/settings.svg'
 
 import { useSelector } from 'react-redux';
 
@@ -31,6 +32,7 @@ const SideMenu = () => {
             <NavLink className="side-menu__icon" activeClassName="side-menu__icon--active" to="/regression" exact={true}><li><IconRegression/></li></NavLink>
             <NavLink className="side-menu__icon" activeClassName="side-menu__icon--active" to="/distrabution" exact={true}><li><IconGaussian/></li></NavLink>
             <NavLink className="side-menu__icon" activeClassName="side-menu__icon--active" to="/test" exact={true}><li><IconTest/></li></NavLink>
+            <NavLink className="side-menu__icon" activeClassName="side-menu__icon--active" to="/setting" exact={true}><li><IconSettings/></li></NavLink>
         </ul>
     )
 }

@@ -5,6 +5,7 @@
 @import './base/settings';
 @import './base/base';
 @import './base/common';
+@import './base/control';
 
 @import './layouts/home';
 @import './layouts/content';
@@ -12,9 +13,12 @@
 @import './components/screens/screen';
 @import './components/screens/graphScreen';
 @import './components/screens/regression';
+@import './components/screens/distributionScreen.scss';
+@import './components/screens/settingScreen.scss';
 
 @import './components/titlebar';
 @import './components/sideMenu';
 @import './components/home';
 @import './components/graph';
+@import './components/tab';
 

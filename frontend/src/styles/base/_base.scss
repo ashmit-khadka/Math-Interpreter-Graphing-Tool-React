@@ -47,6 +47,11 @@
     align-items: center;
 }
 
+.flex-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
 .divider {
     height: 1px;
@@ -61,3 +66,4 @@
     border: none;
     outline: none;
 }
+

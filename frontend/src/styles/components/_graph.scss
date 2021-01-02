@@ -39,7 +39,7 @@
 }
 
 .graph * {
-    transition: .2s ease;
+    //transition: .2s ease;
 
 }
 
@@ -156,11 +156,13 @@
 }
 
 .testSVG {
-    display: block;
-    width: 600px;
-    height: 600px;
+    //display: block;
+    //width: 600px;
+    //height: 600px;
+    width: inherit;
+    height: inherit;
     background: #ffffff;
-    overflow: hidden;
+    //overflow: hidden;
   }
   
 .myLine {
@@ -171,3 +173,22 @@
     stroke: none;
   }
   
+
+  .hover-line {
+    stroke: #B74779;
+    stroke-width: 2px;
+    stroke-dasharray: 3,3;
+  }
+
+  .testsdiv
+{
+    width: 100%;
+    height: 50px;
+    background-color: orange; 
+}  
+
+
+.object-area {
+    fill: #e49c9c;
+    //stroke: #69b3a2;
+}

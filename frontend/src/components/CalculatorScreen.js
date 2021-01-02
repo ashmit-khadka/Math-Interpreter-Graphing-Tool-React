@@ -17,6 +17,7 @@ const CalculatorScreen = () => {
     const [backResponse, setBackResponse] = useState('')
     const { register, handleSubmit, errors, reset } = useForm()
     const [variableInputs, setVariableInputs] = useState([])
+    const [result, setResult] = useState("")
 
     const sendData = data => {
         console.log(data)
@@ -40,18 +41,59 @@ const CalculatorScreen = () => {
     }
 
 
+    
+    const threadCMD = (path, args) => {
+
+        let cmd = JSON.stringify(path)
+        args.forEach(element => {
+            cmd += ' ' + JSON.stringify(element)
+        });
+
+        const exec = window.require('child_process').exec;
+        let result = '';    
+        console.log(cmd)
+        const child = exec(cmd);   
+        return child
+    }
+
+    
+    const calculate = () => {
+        let data = document.getElementById("eq").value
+
+        console.log(JSON.stringify(data))
+
+        let threadChild = threadCMD(
+            "C:\\Users\\ashmit.khadka\\Documents\\UEA\\CMP-6048A ADVANCED PROGRAMMING CONCEPTS AND TECHNIQUES\\Coursework 1\\InterpreterCore2\\InterpreterCore\\bin\\Debug\\netcoreapp3.1\\InterpreterCore.exe"
+            , [
+                JSON.stringify(data)      
+        ])
+        let result = ''
+        let rows = []
+        threadChild.stdout.on('data', function(data) {
+            result += data;
+        });    
+        threadChild.on('close', function() {        
+            const values = JSON.parse(result)
+            console.log(values)
+            setResult(values.result)
+            document.getElementById("eq").value = ""
+        });
+    }
+
+
+
 
     return (
         <div>
             <div className='testObj'>
                 <h2>Enter formula</h2>
-                <form className='user-input' onSubmit={handleSubmit(sendData)}>
+                <div className='user-input'>
                     <input id="eq" type='text' className='user-input--text' name='equation' placeholder="e.g (4^2)*3+6" ref={register}></input>
                     {/*<button className='user-input--button' type='submit'>Solve!</button>*/}
-                    <button className='user-input--button' onClick={generateVariableInputs} >Solve!</button>
+                    <button className='user-input--button' onClick={calculate} >Solve!</button>
 
-                </form>
-                <span className='response'>{"\nResult:"+backResponse}</span>
+                </div>
+                <span className='response'>{"\nResult: " + result}</span>
                 {/*variableInputs*/}
             </div>
         </div>

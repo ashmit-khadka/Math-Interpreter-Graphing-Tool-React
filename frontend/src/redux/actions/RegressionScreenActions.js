@@ -1,31 +1,39 @@
 //increment action for LineItems reducer.
-export const add = (LineItem) => {
+export const addRegressionEntity = (entity) => {
     return {
-        type:'ADD',
-        payload: LineItem
+        type:'ADD_REGRESSION_ENTITY',
+        payload: entity
     }
 }
 
-export const remove = (LineItemID) => {
+export const selectRegressionEntity = (entityId) => {
     return {
-        type:'REMOVE',
-        payload: LineItemID
+        type:'SELECT_REGRESSION_ENTITY',
+        payload: entityId
     }
 }
 
-//data = {x, y}
-export const updateCoordinate = (data) => {
+export const updateRegressionEntity = (entity) => {
     return {
-        type:'UPDATE_COORDINATE',
-        payload: data
+        type:'UPDATE_REGRESSION_ENTITY',
+        payload: entity
     }
 }
+
+export const removeRegressionEntity = (entityId) => {
+    return {
+        type:'REMOVE_REGRESSION_ENTITY',
+        payload: entityId
+    }
+}
+
+
 
 
 //data = {id, boolean}
 export const toggleVisibility = (data) => {
     return {
-        type:'TOGGLE_VISIBILITY',
+        type:'TOGGLE_VISIBILITY_REGRESSION_ENTITY',
         payload: data
     }
 }

@@ -10,18 +10,40 @@ import {
   axisLeft,
   axisRight,
   zoom,
-  zoomTransform
+  zoomTransform,
+  mouse,
+  area
 } from "d3";
 
 const data = Array.from({ length: 50 }, () => Math.round(Math.random() * 100))
+var resizeTimer = 0
 
 const Graph = (props) => {
+    //console.log(props.lines)
     const svgRef = useRef();
     const wrapperRef = useRef();
     const [currentZoomState, setCurrentZoomState] = useState();
+    const graph = document.getElementById("graph")
+
     const [dimensions, setDimensions] = useState({
-        height: window.innerHeight,
-        width: window.innerWidth
+        height: window.innerHeight-50,
+        width: window.innerWidth-350-100
+    })
+    //const graph = select(wrapperRef.current)
+    //Adjust graph to resize
+    window.addEventListener('resize', ()=> {
+        
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+                        // Run code here, resizing has "stopped"
+            setDimensions({
+                height: graph.offsetHeight,
+                width: graph.offsetWidth
+            })
+            console.log('Resized')
+                    
+        }, 250);
+
     })
 
     //console.log(props.lines)
@@ -30,19 +52,19 @@ const Graph = (props) => {
 
         createGraph()
 
-    }, [currentZoomState, data, props.lines]);
+    }, [currentZoomState, props.lines, props.points, dimensions]);
 
     const createGraph = () => {
 
         const svg = select(svgRef.current);
         const svgContent = svg.select(".content");
-        const width = 600 //window.innerWidth
-        const height = 600 //window.innerHeight
+        let width = dimensions.width
+        let height = dimensions.height
     
     
         // scales + line generator
         const xScale = scaleLinear()
-            .domain([-(data.length), data.length])
+            .domain([-(1000), 1000])
             .range([0, width - 10]);
     
         const yScale = scaleLinear()
@@ -82,10 +104,10 @@ const Graph = (props) => {
         if (currentZoomState) {
             const newXScale = currentZoomState.rescaleX(xScale);
             const newYScale = currentZoomState.rescaleY(yScale);
-    
+            //console.log(newXScale.domain()[0])
             XAxisPos = calcXAxisPos(newYScale(0))
             YAxisPos = calcYAxisPos(newXScale(0))
-            //console.log(`x axis pos: ${XAxisPos}, y axis pos: ${YAxisPos}`)
+            //console.log(`x axis domain: ${newXScale.domain()}, y axis domain: ${newYScale.domain()}`)
     
             xScale.domain(newXScale.domain());
             yScale.domain(newYScale.domain());
@@ -96,26 +118,19 @@ const Graph = (props) => {
             .y(d => yScale(d.y))
             .curve(curveCardinal);
 
-       if (props.lines) {
-            svgContent.selectAll("path").remove();        
-            for(let i=0; i<props.lines.length; i++){
+        var areaa = area()
+            .x(d => d.x)
+            .y0(height)
+            .y1(d => d.y)
+            .curve(curveCardinal);
 
-                if (props.lines[i].visible) {
-                    svgContent
-                        .append("path")
-                        .data([props.lines[i].data])
-                        .attr("class", "line")
-                        .attr("fill", "none")
-                        .attr("stroke", `rgba(${props.lines[i].colour.r}, ${props.lines[i].colour.g}, ${props.lines[i].colour.b}, ${props.lines[i].colour.a})`)
-                        .attr("d", lineGenerator)
-                }
-            }
-        }
+        //console.log('lines..', props.lines)
+        svg.selectAll("path").remove();        
 
         if (props.points) {
-            svgContent.selectAll("circle").remove();
+            svg.selectAll("circle").remove();
             for(let i=0; i<props.points.length; i++){
-                svgContent
+                svg
                     .selectAll("dot")
                     .data(data)
                     .enter().append("circle")
@@ -125,8 +140,50 @@ const Graph = (props) => {
                     .attr("cy", function(d) { return yScale(props.points[i].value.y); })            
             }    
         }
+
+        //console.log('lines..', props.lines, 'areas..', props.areaObjects)
+
+
+        if (props.areaObjects) {
+            for(let i=0; i<props.areaObjects.length; i++){
+                //console.log(props.lines[i])
+                svg
+                .append("path")
+                .data([props.areaObjects[i]])
+                .attr("class", "object-area")
+                .attr("stroke-width", 1.5)
+                .attr("d", area()
+                    .x(function(d) { return xScale(d.x) })
+                    .y0(yScale(0))
+                    .y1(function(d) { return yScale(d.y) })
+                    )           
+
+                
+            }
+        }
+
         
-    
+        if (props.lines) {
+            //console.log('lines..', props.lines)
+            for(let i=0; i<props.lines.length; i++){
+                //console.log(props.lines[i])
+                if (props.lines[i] != null && props.lines[i].visible) {
+                    svg
+                        .append("path")
+                        .data([props.lines[i].data])
+                        .attr("class", "line")
+                        .attr("fill", "none")
+                        .attr("stroke", `rgba(${props.lines[i].colour.r}, ${props.lines[i].colour.g}, ${props.lines[i].colour.b}, ${props.lines[i].colour.a})`)
+                        .attr("d", lineGenerator)
+
+                  
+
+                }
+            }
+        }
+
+        
+
         // axes
         const xAxis = createXaxis(xScale);
         svg
@@ -168,22 +225,24 @@ const Graph = (props) => {
     
         // zoom
         const zoomBehavior = zoom()
-            .scaleExtent([0.05, 30])
+            .scaleExtent([0.05, 300])
             .translateExtent([
-            [0, 0],
-            [width, height]
+                [0, 0],
+                [width, height]
             ])
             .on("zoom", () => {
-            const zoomState = zoomTransform(svg.node());
-            setCurrentZoomState(zoomState);
+                const zoomState = zoomTransform(svg.node());
+                setCurrentZoomState(zoomState);
             });
     
         svg.call(zoomBehavior);  
 
+       
     }
 
     return (
-        <div ref={wrapperRef}>
+        <div ref={wrapperRef} id="graph" className="graph">
+
             <svg ref={svgRef} className="testSVG">
                 <g id="x-axis-grid" className="graph__svg__axis-grid" />
                 <g id="y-axis-grid" className="graph__svg__axis-grid" />

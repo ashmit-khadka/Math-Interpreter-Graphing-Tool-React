@@ -8,7 +8,9 @@ import TitleBar from '../components/TitleBar'
 import SideMenu from '../components/SideMenu'
 import GraphScreen from '../components/screens/GraphScreen'
 import RegressionScreen from '../components/screens/RegressionScreen'
+import DistrabutionScreen from '../components/screens/DistrabutionScreen'
 import TestScreen from '../components/screens/TestScreen'
+import SettingScreen from '../components/screens/SettingScreen'
 import Graph from '../components/Graph'
 import GraphB from '../components/GraphB'
 
@@ -24,10 +26,11 @@ const AppRouter = () => {
                     <Route path='/calculator' component={CalculatorScreen} exact={true}/>
                     <Route path='/graph' component={GraphScreen} exact={true}/>
                     <Route path='/regression' component={RegressionScreen} exact={true}/>
-                    <Route path='/test' component={TestScreen} exact={true}/>
+                    <Route path='/distrabution' component={DistrabutionScreen} exact={true}/>
+                    <Route path='/test' component={GraphScreen} exact={true}/>
+                    <Route path='/setting' component={SettingScreen} exact={true}/>
                 </Switch>
             </div>
-
         </BrowserRouter>
     )
 }

@@ -1,0 +1,78 @@
+.control {
+    //display: flex;
+
+    & label {
+        display: block;
+    }
+    & button {
+        //@include: flex;
+        //margin-left: 10px;
+        background-color: $grey-medium;
+        border: none;
+        outline: none;
+        font-family: 'Lora', serif;
+        //font-size: 1.2rem;
+        transition: .2s ease;
+        align-items: center;
+        padding: 0px 10px;
+
+        &:hover {
+            transform: scale(1.1);
+            background-color: $grey-dark;
+        }
+
+        &:active {
+            transform: scale(0.95);
+        }
+    }
+
+    & input {
+        width: 80%;
+        height: 50px;
+        padding: 0px 10px;
+        background-color: $grey-light;
+        border: none;
+        outline: none;
+        font-size: 1rem;
+        
+        &:focus {
+            transition: .3s ease;
+            background-color: $grey-medium;
+        }    
+    }
+
+    & label {
+
+    }
+
+    &__icon {
+        max-height: 20px;
+        max-width: 20px;
+        margin: 10px;
+        transition: .2s ease;
+        cursor: pointer;
+
+        &:hover {
+            transform: scale(1.1);
+        }
+
+        &:active {
+            transform: scale(0.9);
+        }
+
+        &--disabled {
+            stroke: rgb(141, 54, 54);
+            &:hover {
+                transform: scale(1);
+            }
+    
+            &:active {
+                transform: scale(1);
+            }
+        }
+    }
+
+    &__container {
+        margin-bottom: 30px;
+    }
+}
