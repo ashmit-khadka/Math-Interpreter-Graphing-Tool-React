@@ -28,7 +28,7 @@ export const execShellCommand = (path, args) => {
 
     let cmd = JSON.stringify(path)
     args.forEach(element => {
-        cmd += ' ' + JSON.stringify(element)
+        cmd += ' ' + JSON.stringify(element).replace(/"\\"/g, "'").replace(/\\""/g, "'")
     });
 
     console.log(cmd)

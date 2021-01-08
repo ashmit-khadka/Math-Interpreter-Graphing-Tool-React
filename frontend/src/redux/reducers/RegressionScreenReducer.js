@@ -4,42 +4,52 @@
 const initalData = [
     {
         'id': 1,
+        'type':'regression',
         'title': 'Example Reg Data 1',
         'colour': {r: 108, g: 193, b: 189, a: 1},
-        'points': [
-            {
-                'id':0,
-                'value': {'x': 10,'y':20}
-            },
-            {
-                'id':1,
-                'value': {'x': 20,'y':25}
-            },
-            {
-                'id':2,
-                'value': {'x': 30,'y':32}
-            },
+        'data': [
+            {'x': 10,'y':20},
+            {'x': 20,'y':25},
+            {'x': 30,'y':32}
         ],
-        'line': null,
+        'elements': {
+            'lines': [],
+            'dots': [
+                {'x': 10,'y':20},
+                {'x': 20,'y':25},
+                {'x': 30,'y':32}
+            ],
+            'areas': [],
+        },
         'active':true,
         'visable':true,
 
     },
     {
         'id': 2,
+        'type':'regression',
         'title': 'Example Reg Data 2',
         'colour': {r: 188, g: 123, b: 119, a: 1},
-        'points': [],
-        'line': null,
+        'data': [],
+        'elements': {
+            'lines': [],
+            'dots': [],
+            'areas': [],
+        },
         'active':false,
         'visable':true,
     },
     {
         'id': 3,
+        'type':'regression',
         'title': 'Example Reg Data 3',
         'colour': {r: 148, g: 123, b: 159, a: 1},
-        'points': [],
-        'line': null,
+        'data': [],
+        'elements': {
+            'lines': [],
+            'dots': [],
+            'areas': [],
+        },
         'active':false,
         'visable':true,
     }

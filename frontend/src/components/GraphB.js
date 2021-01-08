@@ -17,6 +17,8 @@ import {
 
 const data = Array.from({ length: 50 }, () => Math.round(Math.random() * 100))
 var resizeTimer = 0
+let calculatedDomain = [-1000,1000]
+let rangeCount = 0
 
 const Graph = (props) => {
     //console.log(props.lines)
@@ -49,26 +51,25 @@ const Graph = (props) => {
     //console.log(props.lines)
     // will be called initially and on every data change
     useEffect(() => {
-
+        //console.log('creating graph..')
         createGraph()
-
-    }, [currentZoomState, props.lines, props.points, dimensions]);
+        //console.log(props.items)
+    }, [currentZoomState, props.lines, props.points, dimensions, props.items]);
 
     const createGraph = () => {
 
         const svg = select(svgRef.current);
-        const svgContent = svg.select(".content");
         let width = dimensions.width
         let height = dimensions.height
     
     
         // scales + line generator
         const xScale = scaleLinear()
-            .domain([-(1000), 1000])
+            .domain([-1000, 1000])
             .range([0, width - 10]);
     
         const yScale = scaleLinear()
-            .domain([-(max(data)), max(data)])
+            .domain([-1000, 1000])
             .range([height, 0]);
     
     
@@ -104,7 +105,7 @@ const Graph = (props) => {
         if (currentZoomState) {
             const newXScale = currentZoomState.rescaleX(xScale);
             const newYScale = currentZoomState.rescaleY(yScale);
-            //console.log(newXScale.domain()[0])
+            //console.log(currentZoomState.y)
             XAxisPos = calcXAxisPos(newYScale(0))
             YAxisPos = calcYAxisPos(newXScale(0))
             //console.log(`x axis domain: ${newXScale.domain()}, y axis domain: ${newYScale.domain()}`)
@@ -118,71 +119,46 @@ const Graph = (props) => {
             .y(d => yScale(d.y))
             .curve(curveCardinal);
 
-        var areaa = area()
-            .x(d => d.x)
-            .y0(height)
-            .y1(d => d.y)
+        var areaGenerator = area()
+            .x(d => xScale(d.x))
+            .y0(yScale(0))
+            .y1(d => yScale(d.y))
             .curve(curveCardinal);
 
         //console.log('lines..', props.lines)
         svg.selectAll("path").remove();        
+        svg.selectAll("circle").remove();
 
-        if (props.points) {
-            svg.selectAll("circle").remove();
-            for(let i=0; i<props.points.length; i++){
+        for (let i=0; i<props.items.length; i++) {
+            if (props.items[i].visible) {
+                for (let j=0; j<props.items[i].elements.areas.length; j++) {       
+                    //console.log(props.items[i].elements.areas[j])       
+                    svg
+                    .append("path")
+                    .data([props.items[i].elements.areas[j]])
+                    .attr("class", "object-area")
+                    .attr("stroke-width", 1.5)
+                    .attr("d", areaGenerator) 
+                }
+
                 svg
-                    .selectAll("dot")
-                    .data(data)
-                    .enter().append("circle")
-                    .attr("class", "graph-point")
-                    .attr("r", 5)
-                    .attr("cx", function(d) { return xScale(props.points[i].value.x); })
-                    .attr("cy", function(d) { return yScale(props.points[i].value.y); })            
-            }    
-        }
+                .selectAll("dot")
+                .data(props.items[i].elements.dots)
+                .enter().append("circle")
+                .attr("r", 5)
+                .attr("fill", `rgb(${props.items[i].colour.r}, ${props.items[i].colour.g}, ${props.items[i].colour.b})`)
+                .attr("cx", function(d) { return xScale(d.x); })
+                .attr("cy", function(d) { return yScale(d.y); })      
 
-        //console.log('lines..', props.lines, 'areas..', props.areaObjects)
-
-
-        if (props.areaObjects) {
-            for(let i=0; i<props.areaObjects.length; i++){
-                //console.log(props.lines[i])
                 svg
                 .append("path")
-                .data([props.areaObjects[i]])
-                .attr("class", "object-area")
-                .attr("stroke-width", 1.5)
-                .attr("d", area()
-                    .x(function(d) { return xScale(d.x) })
-                    .y0(yScale(0))
-                    .y1(function(d) { return yScale(d.y) })
-                    )           
-
-                
-            }
+                .data([props.items[i].elements.lines])
+                .attr("class", "line")
+                .attr("fill", "none")
+                .attr("stroke", `rgb(${props.items[i].colour.r}, ${props.items[i].colour.g}, ${props.items[i].colour.b})`)
+                .attr("d", lineGenerator)
+            }           
         }
-
-        
-        if (props.lines) {
-            //console.log('lines..', props.lines)
-            for(let i=0; i<props.lines.length; i++){
-                //console.log(props.lines[i])
-                if (props.lines[i] != null && props.lines[i].visible) {
-                    svg
-                        .append("path")
-                        .data([props.lines[i].data])
-                        .attr("class", "line")
-                        .attr("fill", "none")
-                        .attr("stroke", `rgba(${props.lines[i].colour.r}, ${props.lines[i].colour.g}, ${props.lines[i].colour.b}, ${props.lines[i].colour.a})`)
-                        .attr("d", lineGenerator)
-
-                  
-
-                }
-            }
-        }
-
-        
 
         // axes
         const xAxis = createXaxis(xScale);
@@ -225,7 +201,7 @@ const Graph = (props) => {
     
         // zoom
         const zoomBehavior = zoom()
-            .scaleExtent([0.05, 300])
+            .scaleExtent([0.005, 300])
             .translateExtent([
                 [0, 0],
                 [width, height]
@@ -235,9 +211,7 @@ const Graph = (props) => {
                 setCurrentZoomState(zoomState);
             });
     
-        svg.call(zoomBehavior);  
-
-       
+        svg.call(zoomBehavior);         
     }
 
     return (

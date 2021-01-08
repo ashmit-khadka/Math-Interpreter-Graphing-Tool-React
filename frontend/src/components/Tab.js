@@ -6,8 +6,10 @@ import { ReactComponent as IconAdd } from '../assets/icons/add.svg'
 import { ReactComponent as IconRemove } from '../assets/icons/remove.svg'
 import { ReactComponent as IconPen } from '../assets/icons/pen.svg'
 import { ReactComponent as IconTick } from '../assets/icons/tick.svg'
+import { ReactComponent as IconVisibility } from '../assets/icons/binoculars.svg'
+import { addNotification } from '../redux/actions/NotificationActions'
 
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 const Tab = (props) => {
 
@@ -24,7 +26,7 @@ const Tab = (props) => {
     })
     if (activeEnitiyIndex < 0) { activeEnitiyIndex = 0 }
 
-    console.log('selected..', activeEnitiyIndex)
+    //console.log('selected..', activeEnitiyIndex)
     
     //Set make the selected tab active.
     const setTab = (id) => {
@@ -37,28 +39,26 @@ const Tab = (props) => {
     const showList = () => {
         document.getElementById('tab-list').classList.remove('hide')
     }
+//                <SketchExample className="line-item__colour" colour={props.redux.reducer[activeEnitiyIndex].colour}/>
 
+
+    //document.getElementById("tab-colour").style.backgroundColor = props.redux.reducer[activeEnitiyIndex].colour
+    const idStyle = {backgroundColor: `rgba(${props.redux.reducer[activeEnitiyIndex].colour.r},${props.redux.reducer[activeEnitiyIndex].colour.g},${props.redux.reducer[activeEnitiyIndex].colour.b},${props.redux.reducer[activeEnitiyIndex].colour.a})`}
     return (
         <div className='tabs'>
             <div className='tab__title' onClick={showList}>
-                <SketchExample className="line-item__colour" colour={props.redux.reducer[activeEnitiyIndex].colour}/>
+                <div id={"tab-colour"} className="tab__colour" style={idStyle}></div>
                 <h2>{props.redux.reducer[activeEnitiyIndex].title}</h2>
                 <IconMore/>
             </div>
             <div className='tabs__header'>
                 {
                     tabs.map((tab, index) => {
-                        return <button key={index} onClick={() => setTab(tab.id)}>{tab.name}</button>
+                        return <button className={tab.active ? "tab__button tab__button--active": "tab__button"} key={index} onClick={() => setTab(tab.id)}>{tab.name}</button>
                     })
                 }
             </div>
-                {<TabList
-                    reducer={props.reducer}
-                    addTabListItemAction={props.addTabListItemAction}
-                    removeTabListItemAction={props.removeTabListItemAction}
-                    editTabListItemAction={props.editTabListItemAction}
-                    redux={props.redux}
-                />}
+
             {
                 //Display the active tab
                 tabs.map((tab, index) => {
@@ -68,6 +68,9 @@ const Tab = (props) => {
                     }
                 })
             }
+                            {<TabList
+                    redux={props.redux}
+                />}
         </div>
     )
 }
@@ -78,6 +81,8 @@ const TabList = (props) => {
 
     const addNewItem = () => {
         dispatch(props.redux.action_add())
+        dispatch(addNotification({'text':'Added new item', 'loader':false}))
+
     }
 
     const hide = () => {
@@ -88,15 +93,16 @@ const TabList = (props) => {
         <div id='tab-list' className='model__background hide'>
 
             <div className='model__content'>
-                <IconClose onClick={hide}/>
+                <div className="model__control">
+                    <div></div>
+                    <IconClose onClick={hide}/>
+                </div>
                 {
                     props.redux.reducer.map((item, index) => {
                         return <TabListItem 
                             key={item.id}
                             id={index}
                             item={item}
-                            removeTabListItemAction={props.removeTabListItemAction}
-                            editTabListItemAction={props.editTabListItemAction}
                             redux={props.redux}
                         />
                     })
@@ -109,13 +115,15 @@ const TabList = (props) => {
 
 //List Item Component.
 const TabListItem = (props) => {
-
+    //console.log(props.item)
     const dispatch = useDispatch()
     const [editMode, setEditMode] = useState(false)
     
     //Function to remove this list item.
     const removeItem = () => {
         dispatch(props.redux.action_remove(props.item.id))
+        dispatch(addNotification({'text':'Removed item', 'loader':false}))
+
     }
 
     //Enable edit mode.
@@ -138,6 +146,11 @@ const TabListItem = (props) => {
         dispatch(props.redux.action_select(props.item.id))
     }
 
+    //Toggle visibility
+    const toggleVisibility = () => {
+        dispatch(props.redux.action_edit({...props.item, visible: !props.item.visible}))
+    }
+
     return (
         <div className="tab-item" onClick={selectItem}>
             <div className="tab-item__detail">
@@ -155,6 +168,7 @@ const TabListItem = (props) => {
                     <IconTick onClick={saveItem}/>:
                     <IconPen onClick={editItem}/>
                 }
+                {<IconVisibility className={props.item.visible ? "" : "icon--disabled" } onClick={toggleVisibility}/>}
                 <IconRemove onClick={removeItem}/>
             </div>
         </div>

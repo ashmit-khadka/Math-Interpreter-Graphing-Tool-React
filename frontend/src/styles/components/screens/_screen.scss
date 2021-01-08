@@ -1,14 +1,21 @@
 .screen {
     display: flex;
 
+    &__data {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
     &__panel {
-        padding: 20px 10px;
+        //padding: 20px 10px;
         z-index: 2;
         min-width: 350px;
         background-color: rgb(253, 253, 253);
         margin-right: 0px;
         box-shadow: 0px 0px 15px 5px #e2e2e2;
         overflow-y: scroll;
+        position: relative;
 
         & svg {
             height: 25px;
@@ -20,6 +27,7 @@
             display: block;
             margin: 15px 0px 5px;
         }
+        padding-bottom: 40px;
     }
 
     &__graph {
@@ -30,6 +38,19 @@
     &__header {
         position: fixed;
         top: 0;
+    }
+
+    &__analyse {
+        position: fixed;
+        bottom: 0;
+        min-width: 332px;
+        padding: 10px;
+        //margin-bottom: 10px;
+        border: none;
+    }
+
+    &__panel-content {
+        padding: 10px ;
     }
 }
 

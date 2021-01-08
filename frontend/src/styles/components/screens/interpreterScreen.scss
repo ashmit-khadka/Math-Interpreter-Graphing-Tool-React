@@ -1,0 +1,48 @@
+.interpreter-screen {
+
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    height: 100%;
+    width: 100%;
+    //padding: 20px;
+
+    &__equation {
+        //background-color: honeydew;
+        padding: 20px;
+    }
+
+
+    &__log {
+        //background-color: ivory;
+        padding: 20px;
+        display: grid;
+        grid-auto-rows: 1fr;
+    }
+
+    &__controls {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        padding: 20px
+    }
+}
+
+
+.table-row {
+    display: flex;
+    //gap: 10px;
+    //background-color: ivory;
+    border-bottom: 1px solid $grey-medium;
+    
+    & label {
+        padding: 10px;
+        flex-grow: 1;
+        flex-basis: 0;    
+    }
+
+    &__header {
+        font-weight: bold;
+        border-bottom: 1px solid $grey-dark;
+
+    }
+}

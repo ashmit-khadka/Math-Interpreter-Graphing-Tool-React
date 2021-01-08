@@ -1,0 +1,41 @@
+.grid-row {
+    display: grid;
+    grid-template-columns: [num-col-start] 40px [num-col-end x-col-start] 1fr [x-col-end y-col-start] 1fr [y-col-end];
+    grid-template-rows: 30px;
+  
+    &__cell {
+        background-color: rgb(253, 253, 253);
+        border: solid 1px $grey-light;
+        text-align: center;
+
+        & svg {
+            margin: 0px;
+            height: 20px;
+            width: 20px;
+        } 
+
+        &--num {
+            grid-column: num-col-start / num-col-end x-col-start;
+            grid-row: 1 / 2;
+            background-color: rgb(247, 247, 247);
+            color: grey;
+        }
+
+        &--header {
+            background-color: $grey-light;
+
+        }
+
+        & input {
+            height: 100%;
+            width: 100%;
+            background-color: inherit;
+            text-align: center;
+            color: inherit;
+        }
+    }
+
+    &--header {
+        
+    }
+}

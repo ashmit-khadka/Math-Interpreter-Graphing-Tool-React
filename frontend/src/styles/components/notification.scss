@@ -1,0 +1,51 @@
+.notification {
+    z-index: 5;
+    position: fixed;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    max-width: 300px;
+    padding: 10px;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    background-color: greenyellow;
+    bottom: -70px;
+
+    &__show {
+        bottom: 50px;
+        animation: status-open .5s ease;
+    }
+
+    &__hide {
+        animation: status-hide .5s ease;
+    }
+
+}
+
+
+@keyframes status-open {
+    0% {
+        opacity: 0;
+        bottom: -70px;
+
+    }
+
+    100% {
+        opacity: 1;
+        bottom: 50px
+    }
+}
+
+@keyframes status-hide {
+    0% {
+        opacity: 0;
+        bottom: 50px;
+
+    }
+
+    100% {
+        opacity: 1;
+        bottom: -70px
+    }
+}

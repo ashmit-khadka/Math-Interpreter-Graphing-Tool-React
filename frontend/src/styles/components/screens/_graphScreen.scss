@@ -111,3 +111,12 @@
     filter: blur(1px);
 
 }
+
+.result-text { 
+    margin-top: 20px;
+    font-size: 1.2rem;
+
+    &--disabled {
+        color: $grey-dark;
+    }
+}
