@@ -1,214 +1,311 @@
 import React, { useState, useEffect } from "react"
-import Tab from '../Tab'
 //redux
 import { useSelector, useDispatch } from 'react-redux';
 import { addEntity, updateEntity, removeEntity, selectEntity } from '../../redux/actions/EntityActions'
-import { setNotification, addNotification } from '../../redux/actions/NotificationActions'
-import randomRGBA from '../../scripts/tools'
+import { addNotification, completeNotification, updateNotification } from '../../redux/actions/NotificationActions'
+import {randomRGBA, getActiveEnitiyIndex } from '../../scripts/tools'
 import GraphB from '../GraphB';
-import GraphC from '../GraphC';
+import Selector from '../Selector'
 import {execShellCommand} from '../../scripts/threader'
+import { enableGraphReset } from '../../redux/actions/GraphActions'
+import { active } from "d3";
 
 //let data = []
-
+let nextNotificationId = 1;
 const PolynomialScreen = () => {
     const polynomialEntities = useSelector(state => state.EntityReducer).filter(entity => entity.type === 'polynomial') 
+    const notifications = useSelector(state => state.NotificationReducer)
+    const [equation, setEquation] = useState()
+
     const dispatch = useDispatch()
     const config = useSelector(state => state.ConfigReducer) 
     const [data, setData] = useState([{},{}])
-   
+    const [notificationId, setNotificationId] = useState()
+    const [isCalculating, SetIsCalculating] = useState(false)
     //Get current active item index.
-    let activePolynomialEnitiyIndex = polynomialEntities.findIndex(item => {
-        return item.active === true
-    })
-    if (activePolynomialEnitiyIndex < 0) { activePolynomialEnitiyIndex = 0 }
+    const activeEnitiyIndex = getActiveEnitiyIndex(polynomialEntities)
 
-    const analyse = () => {
-        /*
-        dispatch(updateEntity({...polynomialEntities[activePolynomialEnitiyIndex], 
-            analysis:{"variables":{
-                "x":5,
-                "c":0
-            },
-            elements:{...polynomialEntities[activePolynomialEnitiyIndex].elements, lines:[
-                {"x":-10000, "y":-10000},
-                {"x":10000, "y":10000},
-            ]}
-        }}))
-       
-        //dispatch(setNotification({'text':'Equation is valid'}))
-        
-        dispatch(addNotification({'text':'Equation is valid', 'loader':false}))
-        */
-        /*
-        const data = [
-            {x:-10000, y:-10000},
-            {x:10000, y:10000},
-        ]
-
-        const analysis = {"variables":{
-            "x":5,
-            "c":0
-        }}
-
-        dispatch(updateEntity(({...polynomialEntities[activePolynomialEnitiyIndex], analysis:analysis, elements: {
-            ...polynomialEntities[activePolynomialEnitiyIndex].elements, lines:data
-        }})))
-        dispatch(addNotification({'text':'Equation is valid', 'loader':false}))
-        */
-
-        const expression = document.getElementById('poly-expression').value
-        if (expression != "")
-        {
-            execShellCommand(
-                config.InterpeterPath, ["parse", JSON.stringify([expression])      
-            ]).then(response => {
-                console.log(response.variables)
-                if (response.status && response.status == "good") {
-                    polynomialEntities[activePolynomialEnitiyIndex].analysis.variables = response.variables
-                    dispatch(updateEntity(polynomialEntities[activePolynomialEnitiyIndex]))
-                }
-            })
-        }
-        else if ()
-
-
-    }
+    const resolution = 10
 
     const addPolynomialEnitiy = () => {
-        return addEntity({            
+        return addEntity({         
             'id': null,
             'type':'polynomial',
-            'title': null,
+            'title': 'New Line 2',
             'colour': randomRGBA(),
             'data': [],
-            'analysis': {},
+            'analysis': {
+                'analysed': false,
+                'expression': null,
+                'function':null,
+                'variables': {}
+            },
             'elements': {
                 'lines': [],
                 'dots': [],
                 'areas': [],
-            },        'active':false,
-            'visible':true,        
+            },        
+            'active':true,
+            'visible':true,
+            'analysed':false                
         })
     }
 
 
     const linegenerator = (lower, upper) => {
-        const expression = "2x+c"
-        clear()
-        const expressionList = [
-            "x=4",
-            "c=2",
-            "x+2"            
-        ]
-        const increment = Math.round(upper / 100)
-        for(let i = 0; i<upper; i+=increment) {
-            expressionList[0] = "x="+i
-            //console.log(expressionList)
-            execShellCommand(
-                config.InterpeterPath, ["expression", JSON.stringify(expressionList)      
-            ]).then(response => {
-                //console.log(i, response)
-                setData(data => [...data, {"x":i,"y":response.output}])
-            })
-        }         
+        SetIsCalculating(true)       
+        nextNotificationId = notifications.length ? notifications[notifications.length-1].id + 1 : 1
+        let expressionList = []
+        for (let [key, value] of Object.entries(polynomialEntities[activeEnitiyIndex].analysis.variables)) {
+            expressionList.push(`${key}=${document.getElementById("variable-"+key).value}`)
+        }
+        expressionList.push(polynomialEntities[activeEnitiyIndex].analysis.expression)
+        clear() 
+        dispatch(addNotification({'text':'Calculating points', 'loader':true}))       
+        console.log(expressionList)
+        const increment = Math.round((upper-lower) / resolution)
+        
+        for(let i = lower; i<upper; i+=increment) {
+
+            setTimeout(function() {
+                expressionList[0] = "x="+i
+                execShellCommand(
+                    config.InterpeterPath, ["expression", JSON.stringify(expressionList)      
+                ]).then(response => {
+                    setData(data => [...data, {"x":i,"y":response.output}])
+                })
+            }, 50);
+  
+        }  
+        
+
     }
 
     const onRecalculate = (rangeUpper, rangeLower) => {
-        console.log('new range upper..', rangeUpper,'new range lower..'  ,rangeLower)
-        linegenerator(0, rangeUpper[1])
+        console.log('new range upper..', rangeUpper,'new range lower..', rangeLower)
+        linegenerator(rangeUpper[0], rangeUpper[1])
+        //
     }
 
+
     useEffect(() => {
-        console.log(data)
-        if (data.length == 99) {
-            console.log('complete')
+        //console.log("set id", nextNotificationId)
+        //console.log("true id", notifications[notifications.length-1].id + 1)
+        dispatch(updateNotification({'id':nextNotificationId,'text':`Calculating points ${data.length}%`}))
+        if (data.length == resolution-1) {
+            console.log('complete', notificationId)
             data.pop()
-            polynomialEntities[activePolynomialEnitiyIndex].elements.lines = data.sort((a, b) => (a.x > b.x) ? 1 : -1)
-            dispatch(updateEntity(polynomialEntities[activePolynomialEnitiyIndex]))
+            polynomialEntities[activeEnitiyIndex].elements.lines = data.sort((a, b) => (a.x > b.x) ? 1 : -1)
+            dispatch(updateEntity(polynomialEntities[activeEnitiyIndex]))
+            dispatch(completeNotification(nextNotificationId))
+            SetIsCalculating(false)
         }
     }, [data])
+
+
+    useEffect(()=>{
+        console.log("id is..", notificationId)
+    },[notificationId])
 
 
     const clear = () => {
         setData([])
     }
 
-    return (
-        <div className="page screen">
-            <div className="screen__panel">
-                <Tab 
-                    tabs={[
-                        {
-                            'name':'Analysis',
-                            'component': <AnalysisTab polynomials={polynomialEntities}/>,
-                        }
-                    ]}
-                    redux={{
-                        'reducer': polynomialEntities,
-                        'action_select': selectEntity,
-                        'action_edit': updateEntity,
-                        'action_remove': removeEntity ,
-                        'action_add': addPolynomialEnitiy,
-                    }}
-                />    
-                <button onClick={()=>linegenerator(0, 10000)}>Test</button>            
-                <button onClick={clear}>Clear</button>            
-                <button className='screen__analyse' onClick={analyse}>Analyse</button>  
-          </div>
-            <div className="graph-screen__graph">
-                <GraphB
-                    items = {polynomialEntities}
-                    onRecalculate={onRecalculate}
-                />
-            </div>
-        </div>
-    )
-}
-
-const AnalysisTab = () => {
-    const polynomialEntities = useSelector(state => state.EntityReducer).filter(entity => entity.type === 'polynomial') 
-    //const notification = useSelector(state => state.NotificationReducer)
-
-    const dispatch = useDispatch()
-    const [equation, setEquation] = useState()
-   
-    //Get current active item index.
-    let activePolynomialEnitiyIndex = polynomialEntities.findIndex(item => {
-        return item.active === true
-    })
-    if (activePolynomialEnitiyIndex < 0) { activePolynomialEnitiyIndex = 0 }
-
-    //console.log('sdfsdfsd', polynomialEntities[activePolynomialEnitiyIndex].analysis)
 
     let variables = [] 
-    if (polynomialEntities[activePolynomialEnitiyIndex].analysis.variables) {
+
+    const parseExpression = () => {
+        const expression = document.getElementById("line-expression").value
+        if (expression !== "" )
+        {
+            execShellCommand(
+                config.InterpeterPath, ["parse", JSON.stringify([expression])      
+            ]).then(response => {
+                console.log(response.variables)
+                if (response.status && response.status == "good" && response.variables && Object.keys(response.variables).length > 0) {
+                    polynomialEntities[activeEnitiyIndex].analysis.variables = response.variables
+                    polynomialEntities[activeEnitiyIndex].analysis.function = Object.keys(response.variables)[0]
+                    polynomialEntities[activeEnitiyIndex].analysis.expression = expression
+                    polynomialEntities[activeEnitiyIndex].analysis.parsed = true
+                    dispatch(updateEntity(polynomialEntities[activeEnitiyIndex]))
+                    dispatch(addNotification({"text":"Parse successful", "loader":false}))
+
+                    //if (response)
+                    //dispatch(enableGraphReset())
+                    //linegenerator(-100000, 10000)
+                }
+                else if (response.status && response.status == "bad") {
+                    console.log(response)
+                    dispatch(addNotification({"text":`${response.type} - ${response.error}`, "loader":false}))
+                }
+                else {
+                    dispatch(addNotification({"text":"Cannot parse the expression "+expression, "loader":false}))
+                }
+            })
+        }
+    }
+
+    const analyseExpression = () => {
+        let expressionList = []
+        for (const [key, value] of Object.entries(polynomialEntities[activeEnitiyIndex].analysis.variables)) {
+            if (value != null) {
+                expressionList.push(`${key}=${value}`)
+            }
+            else {
+                dispatch(addNotification({"text":`Please enter value for ${key} and try again.`, "loader":false}))
+                return
+            }
+        }
+        expressionList.push(polynomialEntities[activeEnitiyIndex].analysis.expression)
+        execShellCommand(
+            config.InterpeterPath, ["expression", JSON.stringify(expressionList)      
+        ]).then(response => {
+            console.log(response.variables)
+            if (response.status && response.status == "good") {
+                polynomialEntities[activeEnitiyIndex].analysis.result = response.output
+                polynomialEntities[activeEnitiyIndex].analysed = true
+                dispatch(updateEntity(polynomialEntities[activeEnitiyIndex]))
+                dispatch(addNotification({"text":"Analysis Complete", "loader":false}))
+
+            }
+            else if (response.status && response.status == "bad") {
+                console.log(response)
+                dispatch(addNotification({"text":`${response.type} - ${response.error}`, "loader":false}))
+            }
+            else {
+                dispatch(addNotification({"text":"Cannot parse the expression", "loader":false}))
+            }
+        })
+
+    }
+
+    const onVariableValueChange = (e) => {
+        console.log(e.target.name)
+        polynomialEntities[activeEnitiyIndex].analysis.variables[e.target.name] = e.target.value
+        polynomialEntities[activeEnitiyIndex].analysed = false
+        dispatch(updateEntity(polynomialEntities[activeEnitiyIndex]))
+    }
+
+
+    //determins if the data needs to be analysed.
+    const toggleAnalysis = () => {
+        if (polynomialEntities[activeEnitiyIndex].analysis.analysed) {
+            polynomialEntities[activeEnitiyIndex].analysis.analysed = false
+            dispatch(updateEntity(polynomialEntities[activeEnitiyIndex].analysis))
+        }
+    }
+
+    const plotGraph = () => {
+        dispatch(enableGraphReset())
+        linegenerator(-10000, 10000)
+    }
+
+    if (polynomialEntities[activeEnitiyIndex].analysis.variables) {
         variables.push(<label key={0}>Variables:</label>)
-        for (let [key, value] of Object.entries(polynomialEntities[activePolynomialEnitiyIndex].analysis.variables)) {
-            console.log(key)
+        for (let [key, value] of Object.entries(polynomialEntities[activeEnitiyIndex].analysis.variables)) {
             variables.push(
-                <div key={key}>
-                    <label>{key} = </label>    
-                    <input id="" type='number' className='input--text' name='equation' placeholder="" ></input>
+                <div className="line-variable-item" key={key}>
+                    <div className="line-variable-item__control">
+                        <label>Make function of</label>
+                        <input type="radio" value={key} defaultChecked={
+                            polynomialEntities[activeEnitiyIndex].analysis.function === key
+                        }></input>
+                    </div>
+                    <div className="line-variable-item__value">
+                        <label>{key}=</label> 
+                        <input id={"variable-"+key} name={key} type='number' className='input--text' defaultValue={value} onChange={onVariableValueChange}></input>
+                    </div>
+
                 </div>
             )
         }
     }
 
-    const onChangeEquation = (e) => {
-        //console.log(e.target.value)
-        //setEquation(e.target.value)
-    }
-
-
     return (
-        <div className="screen__panel-content">
-            <label>Expression:</label>    
-            <input id="poly-expression" type="text" className='input--text' name='equation' placeholder="Enter polynomial.." onChange={onChangeEquation}></input>
-            <span>{equation}</span>
-            <div>
-                {variables}
-                <p className="result-text result-text--disabled">Result: -</p>
+        <div className="page screen">
+            <div className="screen__panel">
+                <Selector 
+                    reducer={polynomialEntities}
+                    actionSelect={selectEntity}
+                    actionEdit={updateEntity}
+                    actionRemove={removeEntity}
+                    actionAdd={addPolynomialEnitiy}                
+                />   
+                <div className="screen__panel-content">
+                    <label>
+                        {
+                            polynomialEntities[activeEnitiyIndex].analysis.function !== null ? 
+                            `Expression f(${polynomialEntities[activeEnitiyIndex].analysis.function}):` : 
+                            "Expression f(?):"
+                        }
+                    </label>    
+                    <input id="line-expression" type="text" className='input--text mb--10' name='equation' placeholder="Enter polynomial.." onChange={toggleAnalysis}
+                        defaultValue={polynomialEntities[activeEnitiyIndex].analysis.expression}>                
+                    </input>
+                    <button 
+                        className={
+                            polynomialEntities[activeEnitiyIndex].analysis.parsed ?
+                            "input--button input--button--active" : "input--button input--disabled"
+                        }
+                        onClick={plotGraph}
+                    >Plot</button>
+                    <div 
+                        className={
+                            polynomialEntities[activeEnitiyIndex].analysis.parsed ?
+                            "screen__section" : "screen_section hide"
+                        }
+                    >
+                        <hr className="divider"></hr>
+                        <span>{equation}</span>
+                        <div>
+                            {variables}
+                        </div>
+                    </div>
+
+                    <div 
+                        className={
+                            polynomialEntities[activeEnitiyIndex].analysis.parsed ?
+                            "screen__section" : "screen_section hide"
+                        }
+                    >
+                        <hr className="divider"></hr>
+                        <label>Roots:</label>    
+                        <label id="" type="text" className='label--text'>                               
+                        </label>
+                        <label>Result:</label>    
+                        <label id="" type="text" className='label--text'>
+                            {
+                                polynomialEntities[activeEnitiyIndex].analysed && polynomialEntities[activeEnitiyIndex].analysis.result ?
+                                polynomialEntities[activeEnitiyIndex].analysis.result : ""
+                            }                               
+                        </label>
+                    </div>
+
+                </div>
+
+                <button 
+                    className={polynomialEntities[activeEnitiyIndex].analysed ?
+                        'screen__analyse-btn screen__analyse-btn--disabled' :
+                        'screen__analyse-btn screen__analyse-btn--active'
+                    }
+                    onClick={() => {
+                        polynomialEntities[activeEnitiyIndex].analysis.parsed ?
+                        analyseExpression() : parseExpression()
+                    }}
+                >
+                    {
+                        polynomialEntities[activeEnitiyIndex].analysis.parsed ?
+                        "Analyse" : "Check Expression"
+                    }
+                </button>  
+          </div>
+            <div className="graph-screen__graph">
+                <GraphB
+                    items = {polynomialEntities}
+                    onRecalculate={onRecalculate}
+                    isCalculating={isCalculating}
+                    />
             </div>
         </div>
     )

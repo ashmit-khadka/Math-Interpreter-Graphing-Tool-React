@@ -3,63 +3,11 @@
     color: black;
 }
 
-.testtt {
-
-    height: 50px;
-    width: 50px;
-    &:hover {
-        transform: scale(1.5);
-    }
-}
 
 
-.input {
-    //display: flex;
-    width: 87%;
-    margin: 20px 10px;
-    align-items: center;
-    padding: 10px;
-    background-color: rgb(252, 252, 252);
-    box-shadow: 0px 0px 10px 2px #eeeeee;
-    
-    &__colour {
-        margin-right: 10px;
-    }
 
-    &--text {
-        width: 90%;
-        height: 40px;
-        padding: 0px 10px;
-        background-color: $grey-light;
-        border: none;
-        outline: none;
-        //font-size: 1.6rem;
-        &:focus {
-            transition: .3s ease;
-            background-color: $grey-medium;
-        }
-    }
 
-    &--full {
-        width: 100%;
-    }
-}
 
-.label-text {
-    width: 90%;
-    padding: 15px;
-    background-color: $grey-light;
-    transition: .2s ease;
-    &:hover {
-        background-color: $grey-medium;
-        cursor: pointer;
-
-    }
-    &:active {
-        background-color: rgb(216, 216, 216);
-    }
-
-}
 
 .icon-button {
     height: 20px;
@@ -69,6 +17,11 @@
     &--small {
         height: 15px;
         width: 15px;
+    }
+
+    &--large {
+        height: 25px;
+        width: 25px;
     }
 
     &:hover {
@@ -87,5 +40,173 @@
     display: flex;
     justify-content: center;
     width: 100%;
+    height: 50px;
   
+}
+
+.shadow {
+    z-index: 3;
+    height: 100vh;
+    width: 100vw;
+    background-color: rgba(0, 0, 0, 0.5);
+    position: fixed;
+    top: 0;
+}
+
+.hide {
+    display: none;
+}
+
+
+.input {
+
+    &--text {
+        width: 90%;
+        padding: 15px;
+        background-color: $grey-light;
+        border: none;
+        outline: none;
+        padding: 15px;
+        border-radius: 8px;
+        color: rgb(80, 80, 80);
+
+        &:focus {
+            transition: .3s ease;
+            background-color: $grey-medium;
+        }
+    }
+
+    &--combobox {
+        outline: none;
+        border: none;
+        background-color: $grey-light;
+        padding: 10px;
+        width: 100%;
+        transition: .2s ease;
+        padding: 15px;
+        border-radius: 8px;
+        color: rgb(80, 80, 80);
+
+        &:hover {
+            cursor: pointer;
+            background-color: $grey-medium;
+
+        }
+        &:active {
+            background-color: rgb(216, 216, 216);
+        }
+    }
+
+    &--button {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        outline: none;
+        transition: .2s;
+
+        &:hover {
+            cursor: pointer;
+            background-color: $grey-medium;
+
+        }
+        &:active {
+            background-color: rgb(216, 216, 216);
+        }
+
+        &--active {
+            background: rgb(203, 228, 203);
+            
+            &:hover {
+                background: rgb(189, 211, 189);
+            }
+            &:active {
+                background: rgb(176, 194, 176);
+            }
+        }
+    }
+
+    &--radio {
+
+    }
+
+    &--disabled {
+        pointer-events: none;
+    }
+    
+}
+
+.label {
+    &--text {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        outline: none;
+        border: none;
+        background-color: $grey-light;        
+        max-width: 100%;
+        transition: .2s ease;
+        padding: 15px;
+        border-radius: 8px;
+        color: rgb(80, 80, 80);
+
+        &:hover {
+            cursor: pointer;
+            background-color: $grey-medium;
+            & svg {
+                fill: rgb(80, 80, 80);
+            } 
+        }
+        &:active {
+            background-color: rgb(216, 216, 216);
+        }
+
+        & svg {
+            transition: .2s ease;
+            width: 15px;
+            fill: rgb(190, 190, 190);
+        } 
+    }
+
+    &--item {
+        //font-weight: 600;
+        color: rgb(80, 80, 80);
+    }
+}
+
+
+.info-item {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;   
+    
+    
+    &--disabled {
+        & * {
+            color: rgb(206, 206, 206);
+        }
+        & .label--text, .input--text {
+            background-color: rgb(245, 245, 245);
+        }
+        pointer-events: none;
+    }
+}
+
+
+
+.sub-section {
+    display: flex;
+    width: 95%;
+    gap: 20px;
+    color: grey;
+}
+
+
+.input-model {
+
+}
+
+
+.mb--10 {
+    margin-bottom: 10px;
 }

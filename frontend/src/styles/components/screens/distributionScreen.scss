@@ -1,4 +1,13 @@
-.disabledsrn {
-    pointer-events: none;
-    opacity: 0.4;
+.dist-screen {
+
+    &--data-radio {
+        margin-top: 10px;
+        margin-bottom: -5px;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+
+        color: $grey-darker;
+    }
 }

@@ -1,5 +1,12 @@
 //increment action for config reducer.
 
+export const loadConfig = (data) => {
+    return {
+        type:'CONFIG_LOAD',
+        payload: data
+    }
+}
+
 export const setInterpreter = (path) => {
     return {
         type:'SET_INTERPRETER_PATH',
@@ -13,3 +20,5 @@ export const setCSVHandler = (path) => {
         payload: path
     }
 }
+
+

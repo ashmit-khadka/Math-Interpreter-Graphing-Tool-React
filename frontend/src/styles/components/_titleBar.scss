@@ -1,6 +1,6 @@
 
 .title-bar {
-    
+    z-index: 4;
     height: $title-bar-size;
     width: 100vw;
     display: flex;
@@ -9,7 +9,7 @@
     background-color: $grey-lighter;
     -webkit-app-region: drag;
 
-    overflow: hidden;
+    //overflow: hidden;
 
     & div {
         display: inherit;
@@ -25,6 +25,8 @@
             height: $title-bar-size;
             width: $title-bar-size;
             background-color: $grey-lighter;
+            outline: none;
+            //cursor: pointer;
 
             &:hover {           
                 background-color: $grey-medium;
@@ -58,4 +60,45 @@
         height: 10px;
         width: 10px;
     }
+
+    &__drop {
+        position: relative;
+
+        &__children {
+            display: none;
+            z-index: 5;
+            position: absolute;
+            //display: flex;
+            flex-direction: column;
+            bottom: -100px;
+            min-width: 200px;
+            background-color: $grey-lighter;
+            box-shadow: 5px 12px 10px 1px rgba(83, 83, 83, 0.2);
+            
+            & button {
+                width: 100%;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                padding-left: 10px;
+            
+            }
+
+            & svg {
+                height: 20px;
+                width: 20px;
+            }
+
+            &--hide {
+                bottom: 100px;
+            }
+        
+        }      
+
+        &--active {
+            background-color: $grey-medium;
+        }  
+    }
+
+  
 }

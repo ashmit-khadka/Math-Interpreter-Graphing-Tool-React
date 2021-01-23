@@ -23,7 +23,7 @@
 
         &--header {
             background-color: $grey-light;
-
+            border: solid 1px $grey-medium
         }
 
         & input {
@@ -32,6 +32,8 @@
             background-color: inherit;
             text-align: center;
             color: inherit;
+            outline: none;
+            border: none;
         }
     }
 

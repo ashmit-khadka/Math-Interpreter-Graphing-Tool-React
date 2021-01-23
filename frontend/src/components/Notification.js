@@ -30,12 +30,18 @@ const Notification = () => {
         //console.log('showing..')
 
         if (nextNotification !== undefined)
-        show()
-        setTimeout(() => {
-                hide()
-                //console.log('hiding..')
+        {
+            show()
+            if (!nextNotification.loader) {
+                setTimeout(() => {
+                    hide()    
+                }, 2000)
+            }
+        }
+        else {
+            hide()
+        }
 
-        }, 2000)
     
 
 

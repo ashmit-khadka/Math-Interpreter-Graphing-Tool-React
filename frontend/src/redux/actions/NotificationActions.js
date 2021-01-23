@@ -19,3 +19,10 @@ export const completeNotification = (id) => {
         payload: id
     }
 }
+
+export const updateNotification = (data) => {
+    return {
+        type:'UPDATE_NOTIFICATION',
+        payload: data
+    }
+}

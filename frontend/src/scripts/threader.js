@@ -28,7 +28,10 @@ export const execShellCommand = (path, args) => {
 
     let cmd = JSON.stringify(path)
     args.forEach(element => {
-        cmd += ' ' + JSON.stringify(element).replace(/"\\"/g, "'").replace(/\\""/g, "'")
+        cmd += ' ' + JSON.stringify(element)
+        .replace(/"\\"/g, "'")
+        .replace(/\\""/g, "'")
+        .replace("^", "^^")
     });
 
     console.log(cmd)
@@ -38,6 +41,7 @@ export const execShellCommand = (path, args) => {
         exec(cmd, (error, stdout, stderr) => {
             if (stdout)
             {
+                //console.log(stdout)
                 const response = checkJSON(stdout)
                 if (response) { resolve(response) } 
             }

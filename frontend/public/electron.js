@@ -5,7 +5,7 @@ const isDev = require("electron-is-dev")
 function createWindow () {
   const win = new BrowserWindow({
     width: 1280,
-    height: 720,
+    height: 800,
     webPreferences: {
       enableRemoteModule: true,
       nodeIntegration: true

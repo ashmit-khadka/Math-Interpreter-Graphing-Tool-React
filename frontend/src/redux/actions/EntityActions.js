@@ -28,9 +28,10 @@ export const removeEntity = (entityId) => {
 }
 
 
-export const toggleVisibility = (id) => {
+
+export const loadEntities = (data) => {
     return {
-        type:'TOGGLE__VISIBILITY',
-        payload: id
+        type:'LOAD_ENTITIES',
+        payload: data
     }
 }

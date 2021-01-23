@@ -5,7 +5,7 @@ import { ReactComponent as IconSaveFile} from '../assets/icons/saving-disc.svg'
 import { ReactComponent as IconRemove} from '../assets/icons/remove.svg'
 
 const GridRow = (props) => {
-    
+    //console.log(props.id)
     const [isHover, setIsHover] = useState(false)
 
     const onChange = () => {   
@@ -21,8 +21,8 @@ const GridRow = (props) => {
     let fields = []
     for (const [key, value] of Object.entries(props.data)) {
         fields.push(
-            <div key={key} className={"grid-row__cell"}>
-                <input  id={`gr-${props.id}-${key}`} className="input-text" type="number" defaultValue={value} onChange={onChange}></input>
+            <div key={props.id} className={"grid-row__cell"}>
+                <input  id={`gr-${props.id}-${key}`} className="" type="number" value={value} onChange={onChange}></input>
             </div>
         )
     }
@@ -50,8 +50,8 @@ const Grid = (props) => {
                 {
                     props.headers.map((header, index) => {
                         return(
-                            <div key={index} className="data-row__cell data-row__cell--header">
-                                <input className="input-text" type="text" defaultValue={header}></input>
+                            <div key={index} className="grid-row__cell grid-row__cell--header">
+                                <input className="headerss" type="text" value={header} readOnly></input>
                             </div>
                         )
                     })

@@ -1,15 +1,20 @@
 import React, { useState, useEffect } from 'react';
+import { NavLink } from 'react-router-dom'
 import Graph from '../Graph';
 import GraphB from '../GraphB';
-import LineItem from '../LineItem'
+import GraphC from '../GraphC';
+import Selector from '../Selector'
+
 import { ReactComponent as IconAdd} from '../../assets/icons/add.svg'
 import { ReactComponent as IconOpenFile} from '../../assets/icons/open-file.svg'
 import { ReactComponent as IconSaveFile} from '../../assets/icons/saving-disc.svg'
 import { ReactComponent as IconLink} from '../../assets/icons/foreign.svg'
+import { ReactComponent as IconCopy} from '../../assets/icons/copy.svg'
+
 
 import {execShellCommand} from '../../scripts/threader'
-import CSVFileReader from '../../scripts/fileReader'
-import {randomRGBA, copyToClipboard, round} from '../../scripts/tools'
+import { CSVFileReader, CSVFileWritter } from '../../scripts/fileReader'
+import {randomRGBA, copyToClipboard, round, getActiveEnitiyIndex, templateLineEntity} from '../../scripts/tools'
 
 import Tab from '../Tab'
 import Grid from '../Grid'
@@ -18,9 +23,11 @@ import Grid from '../Grid'
 import { useSelector, useDispatch } from 'react-redux';
 import { addEntity, updateEntity, removeEntity, selectEntity } from '../../redux/actions/EntityActions'
 
+import { Redirect  } from 'react-router-dom';
 
 import { MathComponent } from 'mathjax-react'
 import { InlineMath, BlockMath } from 'react-katex';
+import { addNotification } from '../../redux/actions/NotificationActions';
 
 //CSV handler
 //import { threadCMD } from '../../scripts/threader'
@@ -30,12 +37,10 @@ const RegressionScreen = () => {
     const regressionEntities = useSelector(state => state.EntityReducer).filter(entity => entity.type === 'regression') 
     const dispatch = useDispatch()
 
-   
+    const config = useSelector(state => state.ConfigReducer) 
+
     //Get current active item index.
-    let activeRegressionEnitiyIndex = regressionEntities.findIndex(item => {
-        return item.active === true
-    })
-    if (activeRegressionEnitiyIndex < 0) { activeRegressionEnitiyIndex = 0 }
+    const activeEnitiyIndex = getActiveEnitiyIndex(regressionEntities)
 
     const addRegressionEnitiy = () => {
         return addEntity({            
@@ -54,32 +59,95 @@ const RegressionScreen = () => {
         })
     }
 
-    const analyse = () => {
-        //console.log(JSON.stringify(regressionPoints))
+    const analyse = () => {       
+
+        console.log(JSON.stringify(regressionEntities[activeEnitiyIndex].data))
+        const dataFormatted = regressionEntities[activeEnitiyIndex].data.map( point => [point.x, point.y])
+        console.log(JSON.stringify(dataFormatted))
         
-        let data = []
-
-        console.log(JSON.stringify(regressionEntities[activeRegressionEnitiyIndex].data))
-
+        
         execShellCommand(
-            "C:\\Users\\ashmit.khadka\\Documents\\UEA\\CMP-6048A ADVANCED PROGRAMMING CONCEPTS AND TECHNIQUES\\Coursework 1\\InterpreterCore\\InterpreterCore\\bin\\Debug\\netcoreapp3.1\\InterpreterCore.exe"
-            , [
-                JSON.stringify(regressionEntities[activeRegressionEnitiyIndex].data)      
-        ]).then(response => {
-            //console.log('r line', regressionEntities[activeRegressionEnitiyIndex].line)
-            const data = [
-                    {x:-1000, y:(response.a * -1000 + response.b)},
-                    {x:1000, y:(response.a * 1000 + response.b)},
+            config.MathsHandler.path,
+            [
+                config.MathsHandler.commands.linear_regression_profile,
+                JSON.stringify({"data":dataFormatted})      
+            ]
+        ).then(response => {
+            console.log(response)
+            if (response.status && response.status == "good") {
+                const data = [
+                    [
+                        {x:-10000, y:(response.data.b * -10000 + response.data.a)},
+                        {x:10000, y:(response.data.b * 10000 + response.data.a)},
+                    ],
+                    [
+                        {x:-10000, y:(response.data.b * -10000 + response.data.a) + (2.16 * 0.8165) },
+                        {x:10000, y:(response.data.b * 10000 + response.data.a) + (2.16 * 0.8165) },
+                    ],
+                    [
+                        {x:-10000, y:(response.data.b * -10000 + response.data.a) - (2.16 * 0.8165) },
+                        {x:10000, y:(response.data.b * 10000 + response.data.a) - (2.16 * 0.8165) },
+                    ],
                 ]
+                regressionEntities[activeEnitiyIndex].analysis = response.data
+                regressionEntities[activeEnitiyIndex].elements.lines = data
+                regressionEntities[activeEnitiyIndex].analysed = true
+                dispatch(updateEntity(regressionEntities[activeEnitiyIndex]))
+    
+            }
+        })
         
-            //console.log(data)
-            //setAnalysis({...analysis, a:response.a, b:response.b, r: response.r, xbar:response.xbar, ybar:response.ybar})
-            dispatch(updateEntity({...regressionEntities[activeRegressionEnitiyIndex], analysis:response, elements: {
-                ...regressionEntities[activeRegressionEnitiyIndex].elements, lines:data
-            }}))
-        });
+        /*
+        execShellCommand(
+            config.InterpeterPath
+            , [
+                JSON.stringify(regressionEntities[activeEnitiyIndex].data)      
+        ]).then(response => {
+            const data = [
+                    {x:-10000, y:(response.a * -10000 + response.b)},
+                    {x:10000, y:(response.a * 10000 + response.b)},
+                ]
+            regressionEntities[activeEnitiyIndex].analysis = response
+            regressionEntities[activeEnitiyIndex].elements.lines = data
+            regressionEntities[activeEnitiyIndex].analysed = true
+            dispatch(updateEntity(regressionEntities[activeEnitiyIndex]))
+        })
+
+        */
 
     }
+
+
+    const onRecalculate = (rangeUpper, rangeLower) => {
+        //console.log('new range upper..', rangeUpper,'new range lowers..', rangeLower)
+        if (regressionEntities[activeEnitiyIndex].analysed) {
+            const a = regressionEntities[activeEnitiyIndex].analysis.a
+            const b = regressionEntities[activeEnitiyIndex].analysis.b
+            const data = [
+             
+                [
+                    {x:rangeUpper[0], y:(b * rangeUpper[0] + a)},
+                    {x:rangeUpper[1], y:(b * rangeUpper[1] + a)},
+                ],
+                [
+                    {x:rangeUpper[0], y:(b * rangeUpper[0] + a) + (2.16 * 0.8165) },
+                    {x:rangeUpper[1], y:(b * rangeUpper[1] + a) + (2.16 * 0.8165) },
+                ],
+                [
+                    {x:rangeUpper[0], y:(b * rangeUpper[0] + a) - (2.16 * 0.8165) },
+                    {x:rangeUpper[1], y:(b * rangeUpper[1] + a) - (2.16 * 0.8165) },
+                ]
+            ]
+    
+            console.log(rangeUpper)
+            regressionEntities[activeEnitiyIndex].elements.lines = data
+            dispatch(updateEntity(regressionEntities[activeEnitiyIndex]))
+        }
+
+
+        //linegenerator(rangeUpper[0], rangeUpper[1])
+    }
+
     /*
     const example = String.raw`\int_{-\infty}^{\infty}e^{-x^2}\ dx`;
     <MathComponent className='testtt' tex={example} display={true} />
@@ -92,6 +160,13 @@ const RegressionScreen = () => {
     return (
         <div className="page screen">
             <div className="screen__panel">
+                <Selector 
+                    reducer={regressionEntities}
+                    actionSelect={selectEntity}
+                    actionEdit={updateEntity}
+                    actionRemove={removeEntity}
+                    actionAdd={addRegressionEnitiy}                
+                />
                 <Tab 
                     tabs={[
                         {
@@ -104,23 +179,21 @@ const RegressionScreen = () => {
                         },
 
                     ]}
-                    redux={{
-                        'reducer': regressionEntities,
-                        'action_select': selectEntity,
-                        'action_edit': updateEntity,
-                        'action_remove': removeEntity ,
-                        'action_add': addRegressionEnitiy,
-                    }}
                 />
                 
-                <button className='screen__analyse' onClick={analyse}>Analyse</button>  
-
-
-          </div>
+                <button
+                    className={regressionEntities[activeEnitiyIndex].analysed ?
+                        'screen__analyse-btn screen__analyse-btn--disabled' :
+                        'screen__analyse-btn screen__analyse-btn--active'
+                    } 
+                    onClick={analyse}
+                >Analyse</button>  
+            </div>
             <div className="graph-screen__graph">
                 <GraphB
-                    items = {regressionEntities}
-    
+                    items = {regressionEntities}  
+                    onRecalculate={onRecalculate}
+                    isCalculating={false}  
                 />
             </div>
         </div>
@@ -131,33 +204,90 @@ const RegressionScreen = () => {
 const AnalysisTab = () => {
 
     const regressionEntities = useSelector(state => state.EntityReducer).filter(entity => entity.type === 'regression') 
+    const dispatch = useDispatch()
 
     //Get current active item index.
-    let activeRegressionEnitiyIndex = regressionEntities.findIndex(item => {
-        return item.active === true
-    })
-    if (activeRegressionEnitiyIndex < 0) { activeRegressionEnitiyIndex = 0 }
-    console.log('currently active..')
+    const activeEnitiyIndex = getActiveEnitiyIndex(regressionEntities)
+
 
 
     let equation = null
-    if (regressionEntities[activeRegressionEnitiyIndex].analysis.a && regressionEntities[activeRegressionEnitiyIndex].analysis.b) {
-        equation = `${round(regressionEntities[activeRegressionEnitiyIndex].analysis.a)}x+${round(regressionEntities[activeRegressionEnitiyIndex].analysis.b)}`
+    if (regressionEntities[activeEnitiyIndex].analysis.a && regressionEntities[activeEnitiyIndex].analysis.b) {
+        equation = `${round(regressionEntities[activeEnitiyIndex].analysis.a)}x+${round(regressionEntities[activeEnitiyIndex].analysis.b)}`
+    }
+
+    const createLineEntity = () => {
+        let newLine = templateLineEntity()
+        newLine.analysis.expression = `${round(regressionEntities[activeEnitiyIndex].analysis.a)}x+${round(regressionEntities[activeEnitiyIndex].analysis.b)}`
+        dispatch(addEntity(newLine))
+        dispatch(addNotification({"text":"Create new line item"}))
+    }
+
+    const getCI = () => {
+        let data = []
+        for (let i = 0; i<60; i++) {
+            data.push(
+                (i*0.6)+13.67
+            )
+        }
+
+        let lineUpper = data.map(pointY => {
+            return {x:pointY + 2.16 * 0.8165, y:pointY}
+        })
+        let lineLower = data.map(pointY => {
+            return {x:pointY - 2.16 * 0.8165, y:pointY}
+        })
+
+        regressionEntities[activeEnitiyIndex].elements.lines = [lineUpper, lineLower]
+        dispatch(updateEntity(regressionEntities[activeEnitiyIndex]))
+
+
+        console.log(lineLower, lineUpper)
     }
 
     return (
         <div className="screen__panel-content">
-            <label>Regression Line f(x):</label>    
-            <label className="label-text">{equation || "-"}</label>
-            <div className="center"><IconLink className="icon-button icon-button--small"/></div>
-            
-            <label id="regr">Corelation Coefficient (r):</label>    
-            <label className="label-text">{round(regressionEntities[activeRegressionEnitiyIndex].analysis.r) || "-"}</label>
-            <label>x-bar (x̅):</label>    
-            <label className="label-text">{round(regressionEntities[activeRegressionEnitiyIndex].analysis.xbar) || "-"}</label>
-            <label>y-bar (y̅):</label>    
-            <label className="label-text">{round(regressionEntities[activeRegressionEnitiyIndex].analysis.ybar) || "-"}</label>
+            <button onClick={getCI}>testss</button>
+            <div className="info-item">
+                <label>Regression Line f(x):</label>    
+                <label className="label--text">{equation || "-"}</label>
+            </div>
 
+            <div className="center">
+                <NavLink to='/line'><IconLink className="icon-button" onClick={createLineEntity}/></NavLink>
+            </div>
+            <div className="info-item">
+                <label className="label--item">Corelation Coefficient (r)</label>    
+                <label className="label--text">{round(regressionEntities[activeEnitiyIndex].analysis.r) || "-"}<IconCopy/></label>
+            </div>
+            <div className="info-item">
+                <label className="label--item">R square (rr)</label>    
+                <label className="label--text">{round(regressionEntities[activeEnitiyIndex].analysis.rr) || "-"}<IconCopy/></label>
+            </div>
+            <div className="info-item">
+                <label className="label--item">Slope (b)</label>    
+                <label className="label--text">{round(regressionEntities[activeEnitiyIndex].analysis.b) + ' ± 1.43' || "-"}<IconCopy/></label>
+            </div>
+            <div className="info-item">
+                <label className="label--item">Y Intercept (a)</label>    
+                <label className="label--text">{round(regressionEntities[activeEnitiyIndex].analysis.a) || "-"}<IconCopy/></label>
+            </div>
+            <div className="info-item">
+                <label className="label--item">X Intercept</label>    
+                <label className="label--text">{"-"}<IconCopy/></label>
+            </div>
+            <div className="info-item">
+                <label className="label--item">x-bar (x̅)</label>    
+                <label className="label--text">{round(regressionEntities[activeEnitiyIndex].analysis.xMean) || "-"}<IconCopy/></label>
+            </div>
+            <div className="info-item">
+                <label className="label--item">y-bar (y̅)</label>    
+                <label className="label--text">{round(regressionEntities[activeEnitiyIndex].analysis.yMean) || "-"}<IconCopy/></label>
+            </div>
+            <div className="info-item">
+                <label className="label--item">Standard Error of Estimate (Syx)</label>    
+                <label className="label--text">{round(regressionEntities[activeEnitiyIndex].analysis.Syx) || "-"}<IconCopy/></label>
+            </div>
         </div>
     )
 }
@@ -171,46 +301,54 @@ const DataTab = (props) => {
     const dispatch = useDispatch()
 
     //Get current active item index.
-    let activeRegressionEnitiyIndex = regressionEntities.findIndex(item => {
-        return item.active === true
-    })
-    if (activeRegressionEnitiyIndex < 0) { activeRegressionEnitiyIndex = 0 }
+    const activeEnitiyIndex = getActiveEnitiyIndex(regressionEntities)
 
-
+    const resetAnalysis = () => {
+        regressionEntities[activeEnitiyIndex].analysed = false
+        regressionEntities[activeEnitiyIndex].elements.lines = []
+        dispatch(updateEntity(regressionEntities[activeEnitiyIndex]))
+    }
 
     const readFile = () => {
         CSVFileReader(config.ACTION_READ_REGRESSION_FILE, config.CSVHandlerPath)
         .then(response => {   
             let points = []
             response.data.forEach(point => { points.push(point) }) 
-            dispatch(updateEntity({...regressionEntities[activeRegressionEnitiyIndex], data: points, elements:{
-                ...regressionEntities[activeRegressionEnitiyIndex].elements, dots:points
-            }}))
+            regressionEntities[activeEnitiyIndex].data = points
+            regressionEntities[activeEnitiyIndex].elements.dots = points
+            resetAnalysis()
         })
     }
 
     const addPoint = () => {
-        let points =  regressionEntities[activeRegressionEnitiyIndex].data
+        let points =  regressionEntities[activeEnitiyIndex].data
         points.push({"x":0,"y":0})
-        dispatch(updateEntity({...regressionEntities[activeRegressionEnitiyIndex], data: points, elements:{
-            ...regressionEntities[activeRegressionEnitiyIndex].elements, dots:points
-        }}))
+        regressionEntities[activeEnitiyIndex].data = points
+        regressionEntities[activeEnitiyIndex].elements.dots = points
+        resetAnalysis()
     }
 
     const updatePoint = (index, data) => {
-        let points =  regressionEntities[activeRegressionEnitiyIndex].data
+        let points =  regressionEntities[activeEnitiyIndex].data
         points[index] = data
-        dispatch(updateEntity({...regressionEntities[activeRegressionEnitiyIndex], data: points, elements:{
-            ...regressionEntities[activeRegressionEnitiyIndex].elements, dots:points
-        }}))    
+        regressionEntities[activeEnitiyIndex].data = points
+        regressionEntities[activeEnitiyIndex].elements.dots = points
+        resetAnalysis()
+    }
+
+    const saveData = () => {
+        CSVFileWritter(config.ACTION_WRITE_REGRESSION_FILE, regressionEntities[activeEnitiyIndex].data, config.CSVHandlerPath)
+        .then(response => { 
+            console.log(response)
+        })
     }
 
     const removePoint = (index) => {
 
-        console.log('to remove..', index, regressionEntities[activeRegressionEnitiyIndex].data)
+        console.log('to remove..', index, regressionEntities[activeEnitiyIndex].data)
         let points = []
          //points = points.splice(1, 1)
-        regressionEntities[activeRegressionEnitiyIndex].data
+        regressionEntities[activeEnitiyIndex].data
         .forEach((item, itemIndex) => {
             if (itemIndex != index) {
                 console.log('keep..', item)
@@ -219,21 +357,22 @@ const DataTab = (props) => {
         })
 
         console.log('new points..', points)
-        dispatch(updateEntity({...regressionEntities[activeRegressionEnitiyIndex], data: points, elements:{
-            ...regressionEntities[activeRegressionEnitiyIndex].elements, dots:points
-        }}))    
-    
+        regressionEntities[activeEnitiyIndex].data = points
+        regressionEntities[activeEnitiyIndex].elements.dots = points
+        regressionEntities[activeEnitiyIndex].analysed = false
+        regressionEntities[activeEnitiyIndex].elements.dots = []
+        dispatch(updateEntity(regressionEntities[activeEnitiyIndex]))
     }
 
     
     return (
         <div className="screen__data">
-            <div>
-                <IconOpenFile className="control__icon" onClick={readFile}/>
-                <IconSaveFile className="control__icon control__icon--disabled"/>       
+            <div className="center">
+                <IconOpenFile className="icon-button" onClick={readFile}/>
+                <IconSaveFile className="icon-button" onClick={saveData}/>       
             </div>
             <div className="regression__data">
-                <Grid headers={["X","Y"]} data={regressionEntities[activeRegressionEnitiyIndex].data} onChange={updatePoint} onRemove={removePoint}/>
+                <Grid headers={["X","Y"]} data={regressionEntities[activeEnitiyIndex].data} onChange={updatePoint} onRemove={removePoint}/>
                 <IconAdd className="control__icon" onClick={addPoint}/>                
             </div>
         </div>

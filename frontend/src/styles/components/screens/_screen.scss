@@ -1,3 +1,4 @@
+
 .screen {
     display: flex;
 
@@ -7,6 +8,12 @@
         align-items: center;
     }
 
+    &__controls {
+        display: flex;
+        gap: 15px;
+        margin: 15px;
+    }
+
     &__panel {
         //padding: 20px 10px;
         z-index: 2;
@@ -14,20 +21,9 @@
         background-color: rgb(253, 253, 253);
         margin-right: 0px;
         box-shadow: 0px 0px 15px 5px #e2e2e2;
-        overflow-y: scroll;
-        position: relative;
+        overflow: none;
+        height: 100%;
 
-        & svg {
-            height: 25px;
-            width: 25px;
-            margin: 10px;
-        }
-
-        & label {
-            display: block;
-            margin: 15px 0px 5px;
-        }
-        padding-bottom: 40px;
     }
 
     &__graph {
@@ -40,17 +36,45 @@
         top: 0;
     }
 
-    &__analyse {
+    &__analyse-btn {
         position: fixed;
         bottom: 0;
-        min-width: 332px;
+        left: $side-menu-size;
+        min-width: 350px;
         padding: 10px;
-        //margin-bottom: 10px;
+        outline: none;
         border: none;
+        transition: .2s ease;
+        &--active {
+            background: rgb(203, 228, 203);
+            
+            &:hover {
+                background: rgb(189, 211, 189);
+            }
+            &:active {
+                background: rgb(176, 194, 176);
+            }
+        }
+
+        &--disabled {
+            pointer-events: none;
+        }
     }
 
     &__panel-content {
-        padding: 10px ;
+        padding: 10px;
+    }
+
+    &__section {
+        & hr {
+            //margin: 30px;
+        }
+
+        & label {
+            //margin-bottom: 10px;
+            
+            //background-color: green;
+        }
     }
 }
 
@@ -126,4 +150,23 @@
         margin: 100px;
     }
   
+}
+
+.line-variable-item {
+    display: flex;
+    flex-direction: column;
+
+    &__value {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    &__control {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+        color: grey;
+    }
 }

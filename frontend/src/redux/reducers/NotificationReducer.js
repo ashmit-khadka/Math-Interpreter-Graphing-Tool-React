@@ -3,22 +3,28 @@ const initialStatus = {
     'text': '',
 }
 
+/*
 const initialNotification = [
     {
         'id':0,
         'text':'Example 1',
         'notified': false,
-        'loader': true
+        'loader': false
     },
     {
         'id':1,
         'text':'Example 2',
         'notified': false,
-        'loader': true
+        'loader': false
     }
 ]
+*/
+const initialNotification = [
 
-let notificationId = initialNotification.length
+]
+
+
+let notificationId = initialNotification.length - 1
 
 const NotificationReducer = (notifications = initialNotification, action) => {
     switch (action.type) {
@@ -43,6 +49,15 @@ const NotificationReducer = (notifications = initialNotification, action) => {
             return notifications.map(item => {
                 if (item.id == action.payload) {
                     return {...item, notified:true}
+                }
+                return item
+            })
+
+        case 'UPDATE_NOTIFICATION':
+            //console.log('notifications..', notifications)
+            return notifications.map(item => {
+                if (item.id == action.payload.id) {
+                    return {...item, text:action.payload.text}
                 }
                 return item
             })

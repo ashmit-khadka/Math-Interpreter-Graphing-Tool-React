@@ -1,0 +1,29 @@
+{
+    "InterpeterPath": "C:\\Users\\ashmit.khadka\\Documents\\UEA\\CMP-6048A ADVANCED PROGRAMMING CONCEPTS AND TECHNIQUES\\Coursework 1\\New\\Interpreter\\Interpreter\\bin\\Debug\\net461\\Interpreter.exe",
+    "CSVHandlerPath": "C:\\Users\\ashmit.khadka\\Documents\\UEA\\CMP-6048A ADVANCED PROGRAMMING CONCEPTS AND TECHNIQUES\\Coursework 1\\Tools\\CSV_Handler\\bin\\Debug\\netcoreapp3.1\\CSV_Handler.exe",
+    "DataHandler": {
+        "path":     "C:\\Users\\ashmit.khadka\\source\\repos\\DataHandler\\bin\\Debug\\netcoreapp3.1\\DataHandler",
+        "commands":{
+            "read_distribution":"\"read\" \"distribution\"",
+            "write_distribution":["write", "distribution"],
+            "read_regression":["read", "regression"],
+            "write_regression":["write", "regression"]
+        }
+    },
+    "MathsHandler": {
+        "path": "C:\\Users\\ashmit.khadka\\source\\repos\\MathsHandlerFSharp\\bin\\Debug\\netcoreapp3.1\\MathsHandlerFSharp.exe",
+        "commands": {
+            "linear_regression_profile":"get-linear-regression-profile",
+            "distribution_profile":"get-distribution-profile",
+            "distribution_rank":"get-distribution-rank",
+            "distribution_percentile":"get-distribution-percentile",
+            "distribution_probability":"get-distribution-area-probability"
+        }
+
+    },
+    "MathsHandlerPath": "C:\\Users\\ashmit.khadka\\source\\repos\\MathsHandler\\bin\\Debug\\netcoreapp3.1\\MathsHandler.exe",
+    "ACTION_READ_REGRESSION_FILE": "read-regression",
+    "ACTION_READ_DISTRIBUTION_FILE": "read-distribution",
+    "ACTION_WRITE_REGRESSION_FILE": "write-regression",
+    "ACTION_WRTIE_DISTRIBUTION_FILE": "write-distribution"
+}
