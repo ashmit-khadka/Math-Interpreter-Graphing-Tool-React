@@ -19,18 +19,23 @@ const AppRouter = () => {
 
     return (
         <BrowserRouter>
-            <TitleBar/>
             <Notification/>
-            <SideMenu/>
-            <div className='content'>
-                <Switch>
-                    <Route path='/' component={CalculatorScreen} exact={true}/>
-                    <Route path='/calculator' component={InterpreterScreen} exact={true}/>
-                    <Route path='/line' component={PolynomialScreen} exact={true}/>
-                    <Route path='/regression' component={RegressionScreen} exact={true}/>
-                    <Route path='/distrabution' component={DistrabutionScreen} exact={true}/>
-                    <Route path='/setting' component={SettingScreen} exact={true}/>
-                </Switch>
+            <div className="app__title-bar">
+                <TitleBar/>
+            </div>
+            <div className='app__content'>  
+                <div className="app__side-menu">
+                    <SideMenu/> 
+                </div>
+                <div className="app__screen">
+                    <Switch>
+                        <Route path='/' component={InterpreterScreen} exact={true}/>
+                        <Route path='/line' component={PolynomialScreen} exact={true}/>
+                        <Route path='/regression' component={RegressionScreen} exact={true}/>
+                        <Route path='/distrabution' component={DistrabutionScreen} exact={true}/>
+                        <Route path='/setting' component={SettingScreen} exact={true}/>
+                    </Switch>
+                </div>
             </div>
         </BrowserRouter>
     )

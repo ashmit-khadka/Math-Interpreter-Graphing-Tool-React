@@ -23,7 +23,7 @@ const store = createStore(allReducers)
 
 ReactDOM.render(
   <Provider store={store}>
-    <AppRouter/>,
+    <AppRouter className="app"/>
   </Provider>,
   document.getElementById('root')
 );

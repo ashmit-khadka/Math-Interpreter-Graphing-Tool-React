@@ -5,17 +5,21 @@
     font-family: 'Opne Sans', sans-serif;
     font-size: .9rem;
     //transition: .2s ease;
-    
+    user-select: none;
+
 
 }
 
-.root {}
+.root {
+    height: 100%;
+    width: 100%;
+}
 
 .body {    
 
     //display: flex;
-    //height: 100%;
-    //width: 100%;
+    height: 100vh;
+    width: 100vw;
     //background-color: #FBFBFB;
     overflow: hidden;
 
@@ -28,6 +32,51 @@
 
         //background-color: lightgreen;
 
+}
+
+
+.app {
+    height: 100%;
+    width: 100%;
+    max-height: 100%;
+    max-width: 100%;
+   //overflow:hidden;
+    display: grid;
+    grid-template-columns: [app-sart] 1fr [app-end];
+    grid-template-rows: [app-title-bar-start] $title-bar-size [app-title-bar-end app-content-start] 1fr [app-content-end];
+
+    &__side-menu {
+        z-index: 3;
+    }
+
+    &__screen {
+        z-index: 2;
+
+    }
+
+    &__title-bar {
+        z-index: 3;
+        grid-column: app-start / app-end;
+        grid-row: app-title-bar-start / app-title-bar-end;
+
+    }
+
+
+
+    &__content {
+        overflow: none;
+        //padding: 40px;
+        //overflow-y: scroll;
+        grid-column: app-start / app-end;
+        grid-row: app-content-start / app-content-end;
+
+        display: grid;
+        grid-template-columns: [side-menu-start] $side-menu-size [side-menu-end screen-start] 1fr [screen-end];
+        grid-template-rows: 1fr;
+
+
+
+    }
 }
 
 .noScroll {

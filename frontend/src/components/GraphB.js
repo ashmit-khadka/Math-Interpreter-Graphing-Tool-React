@@ -13,7 +13,9 @@ import {
   zoomTransform,
   mouse,
   area,
-  zoomIdentity
+  zoomIdentity,
+  csv,
+  selectorAll
 } from "d3";
 
 
@@ -33,16 +35,24 @@ const Graph = (props) => {
     const graphConfig = useSelector(state => state.GraphReducer)
     const svgRef = useRef();
     const wrapperRef = useRef();
+    const svgWrapperRef = useRef();
     const [currentZoomState, setCurrentZoomState] = useState(zoomIdentity.scale(1).translate(0, 0));
     const graph = document.getElementById("graph")
+
+
     const [isCalculating, SetIsCalculating] = useState(false)
     const [dimensions, setDimensions] = useState({
-        height: window.innerHeight-50,
-        width: window.innerWidth-350-100
+        height: 110,
+        width: 110
     })
     const dispatch = useDispatch()
 
     const chart = true
+
+
+   
+
+
     //const graph = select(wrapperRef.current)
     //Adjust graph to resize
     window.addEventListener('resize', ()=> {
@@ -63,6 +73,24 @@ const Graph = (props) => {
 
     })
 
+    useEffect(()=>{
+        const graphSVG = select(svgRef.current)
+        const graphSVGWrapper = select(svgWrapperRef.current)
+        const graph = document.getElementById("graph")
+
+        //graphSVG.attr("z-")
+        console.log({
+            height: graphSVGWrapper._groups[0][0].scrollHeight,
+            width: graphSVGWrapper._groups[0][0].scrollWidth
+        })
+
+        setDimensions({
+            height: graph.offsetHeight,
+            width: graph.offsetWidth
+        })
+        //console.log(graphSVG, graphSVG._groups[0][0].scrollHeight)
+    },[])
+
     // will be called initially and on every data change
     useEffect(() => {
         createGraph()
@@ -70,10 +98,10 @@ const Graph = (props) => {
 
     useEffect(() => {
         if (props.isCalculating !== undefined && props.isCalculating) {
-            document.getElementById("graph-svg").classList.add("graph-busy")
+            document.getElementById("graph-svg-wrapper").classList.add("graph-busy")
         }
         else if (props.isCalculating !== undefined && !props.isCalculating) {
-            document.getElementById("graph-svg").classList.remove("graph-busy")
+            document.getElementById("graph-svg-wrapper").classList.remove("graph-busy")
         }
     }, [props]);
 
@@ -89,17 +117,15 @@ const Graph = (props) => {
         if (graphConfig.reset) {
             console.log('resetting..')
             setCurrentZoomState(zoomIdentity.scale(1).translate(0, 0));
-            domainUpper = [-10000,10000]
-            domainLower = [-100,100]
+            domainUpper = [-1000,1000]
+            domainLower = [-10,10]
             dispatch(disableGraphReset())
         }
     });
 
-    const createAxis = () => {
-
-    }
      
     const createGraph = () => {
+        const graphSVGWrapper = select(svgWrapperRef.current)
 
         const svg = select(svgRef.current);
         let width = dimensions.width
@@ -108,11 +134,11 @@ const Graph = (props) => {
     
         // scales + line generator
         const xScale = scaleLinear()
-            .domain(props.activeDomainX ? props.activeDomainX : [-1000, 1000])
+            .domain(props.activeDomainX ? props.activeDomainX : [-100, 100])
             .range([0, width]);
     
         const yScale = scaleLinear()
-            .domain(props.activeDomainY ? props.activeDomainY : [-1000, 1000])
+            .domain(props.activeDomainY ? props.activeDomainY : [-100, 100])
             .range([height, 0]);
     
     
@@ -200,10 +226,11 @@ const Graph = (props) => {
             .y1(d => yScale(d.y))
             .curve(curveCardinal);
 
+            
         //console.log('lines..', props.lines)
-        svg.selectAll("path").remove();        
-        svg.selectAll("circle").remove();
-        svg.selectAll("g").remove();
+        graphSVGWrapper.selectAll("path").remove();        
+        graphSVGWrapper.selectAll("circle").remove();
+        graphSVGWrapper.selectAll("g").remove();
 
 
 
@@ -214,10 +241,14 @@ const Graph = (props) => {
         const xAxisGrid = axisBottom(xScale).tickSize(-height).tickFormat('').ticks(10);
         const yAxisGrid = axisRight(yScale).tickSize(-width).tickFormat('').ticks(10);
         svg
-        .append("g")
-        .attr("class", "graph__svg__axis-grid")
+            .append("g")
+            .attr("class", "graph__svg__axis-grid")
             .call(xAxisGrid)
             .style("transform", `translateY(${height}px`)
+            .select("line")
+            .attr("stroke","rgb(225, 225, 225)")
+            .attr("stroke-width","0.1rem")
+
             //.style("transform", `translate(${domainOffset.x}px, ${dimensions.height + domainOffset.y}px)`)
     
         svg
@@ -252,36 +283,57 @@ const Graph = (props) => {
         const xAxis = createXaxis(xScale);
         svg
             .append("g")   
-            .attr("class", "x-axis")
-
             .style("transform", `translateY(${XAxisPos}px)`)
             .call(xAxis);
 
         const yAxis = createYaxis(yScale);
         svg
             .append("g")
-            .attr("class", "y-axis")
             .style("transform", `translateX(${YAxisPos}px)`)
             .call(yAxis);
-            
-        svg
+
+        
+        /*
+        //graphSVGWrapper.selectAll("g").remove()
+        graphSVGWrapper
             .append('g')
-            .attr('transform', 'translate(' + 10 + ', ' + 500 + ')')
+            .attr('transform', 'translate(' + -10 + ', ' + 500 + ')')
             .append('text')
             .attr('text-anchor', 'middle')
             .attr('transform', 'rotate(-90)')
             .text('Y Axis Label')
-    ;
+
+        graphSVGWrapper
+            .append('g')
+            .attr('transform', 'translate(' + 500 + ', ' + (height + 25) + ')')
+            .append('text')
+            .attr('text-anchor', 'middle')
+            .text('X Axis Label')
+
+        graphSVGWrapper
+            .append('g')
+            .attr('transform', 'translate(' + 500 + ', ' + -10 + ')')
+            .append('text')
+            .attr('text-anchor', 'middle')
+            .text('X Axis Label')
+
+        graphSVGWrapper
+        .selectAll()
+        .attr('background-color', 'tan')
+        */
+
 
         for (let i=0; i<props.items.length; i++) {
             if (props.items[i].visible) {
+
+                //render area elements.
                 for (let j=0; j<props.items[i].elements.areas.length; j++) {       
-                    //console.log(props.items[i].elements.areas[j])       
                     svg
                     .append("path")
                     .data([props.items[i].elements.areas[j]])
                     .attr("class", "object-area")
-                    .attr("opacity",".5")
+                    .attr("fill", `rgb(${props.items[i].colour.r}, ${props.items[i].colour.g}, ${props.items[i].colour.b})`)
+                    .attr("opacity",".2")
                     .attr("stroke-width", 1.5)
                     .attr("d", areaGenerator) 
                 }
@@ -310,7 +362,7 @@ const Graph = (props) => {
     
         // zoom
         const zoomBehavior = zoom()
-            //.scaleExtent([0.005, 10000000])
+            .scaleExtent([0.00005, 100000])
             
             .on("zoom", () => {
                 const zoomState = zoomTransform(svg.node());
@@ -322,16 +374,20 @@ const Graph = (props) => {
 
     return (
         <div ref={wrapperRef} id="graph" className="graph">
-
-            <svg ref={svgRef} id="graph-svg" className="testSVG ">
-                <g id="x-axis-grid" className="graph__svg__axis-grid" />
-                <g id="y-axis-grid" className="graph__svg__axis-grid" />
-                <g id="x-axis-point-grid" className="graph__svg__axis-grid-point" />
-                <g id="y-axis-point-grid" className="graph__svg__axis-grid-point" />
-                <g className="content" clipPath={`url(#${''})`}></g>
+            <svg id="graph-svg-wrapper" className="graph-svg__wrapper" ref={svgWrapperRef}>
+                <svg ref={svgRef} id="graph-svg" className="graph-svg">
+                </svg>
             </svg>
         </div>
     )
 }
+
+//            <svg ref={svgWrapperRef} ></svg>
+/*
+<svg id="graph-svg-wrapper" className="graph-svg__wrapper" ref={svgWrapperRef}>
+<svg ref={svgRef} id="graph-svg" className="graph-svg">
+</svg>
+</svg>
+*/
 
 export default Graph

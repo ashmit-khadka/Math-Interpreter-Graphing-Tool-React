@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "DataHandler": {
+      "commandName": "Project",
+      "commandLineArgs": "\"write\" \"distribution\" \"{\\\"data\\\":[[175],[173],[188],[172],[162],[175],[196],[164],[184],[176],[181],[193]],\\\"path\\\":\\\"C:\\\\Users\\\\ashmit.khadka\\\\Documents\\\\UEA\\\\CMP-6048A ADVANCED PROGRAMMING CONCEPTS AND TECHNIQUES\\\\Coursework 1\\\\Data\\\\testd.csv\\\"}\""
+    }
+  }
+}

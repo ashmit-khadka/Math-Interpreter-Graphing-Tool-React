@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Exceptions.fs" />
+    <Compile Include="Common.fs" />
+    <Compile Include="Models.fs" />
+    <Compile Include="DistributionHandler.fs" />
+    <Compile Include="RegressionHandler.fs" />
+    <Compile Include="ResponseHandler.fs" />
+    <Compile Include="Tests.fs" />
+    <Compile Include="Router.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FSharp.Json" Version="0.4.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+  </ItemGroup>
+
+</Project>

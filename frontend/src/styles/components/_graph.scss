@@ -1,17 +1,45 @@
+.graph-svg {
+    overflow: hidden;
+    height: 100%;
+    width: 100%;
+    z-index: 3;
+
+    &__chart {
+        overflow: visible;
+        //padding-bottom: 50px;
+        //margin-top: 100px;
+        //transform: translateY(-50px);
+        z-index: 3;
+    }
+
+    &__wrapper {
+        width: 100%;
+        height: 100%;    
+        //max-height: 85%;
+        //max-width: 100%;
+
+        pointer-events: all
+    }
+  }
+
 .graph {
-    position: relative;
+    //display: block;
     width: 100%;
     height: 100%;
-    margin-left: 50px;
+    //overflow: visible;
     margin-bottom: 50px;
 
+
+    &__chart {
+        margin-left: 50px;
+        transform: translateY(-50px);
+        margin-bottom: 50px;
+        overflow: visible;
+        max-width: 100%;
+    }
+
+
     &__svg {
-        overflow: hidden;
-        font-size: 4rem;
-        font-weight: 200;
-        width: inherit;
-        height: inherit;
-        //background-color: bisque;
     
         &__axis {
             stroke: $grey-darker;
@@ -40,6 +68,12 @@
     }
 }
 
+.object-area {
+    background-color: rgba(168, 74, 74, 0.89);
+}
+
+
+
 .graph * {
     //transition: .2s ease;
 
@@ -49,6 +83,7 @@
 .line {
     //stroke: #ef9a9a;
     stroke-width: 0.2rem;
+    opacity: .8;
 }
 
 .data {
@@ -153,48 +188,11 @@
 
 }
 
-.graph-point {
-    fill: rgb(119, 82, 82);
-}
 
-.testSVG {
-    //display: block;
-    //width: 600px;
-    //height: 600px;
-    width: inherit;
-    height: inherit;
-    background: #ffffff;
-    //overflow: hidden;
-    transition: .1s;
-  }
-  
-.myLine {
-    z-index: 5;
-}
 
-  svg rect.selection {
-    stroke: none;
-  }
   
 
-  .hover-line {
-    stroke: #B74779;
-    stroke-width: 2px;
-    stroke-dasharray: 3,3;
-  }
 
-  .testsdiv
-{
-    width: 100%;
-    height: 50px;
-    background-color: orange; 
-}  
-
-
-.object-area {
-    fill: #e49c9c;
-    //stroke: #69b3a2;
-}
 
 
 .graph-busy {

@@ -9,8 +9,11 @@
     left: 50%;
     -webkit-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
-    background-color: greenyellow;
+    //background-color: greenyellow;
+    background-color: rgb(226, 191, 221);
+    border-radius: 5px;
     bottom: -70px;
+    color: rgb(68, 53, 66);
 
     &__show {
         bottom: 50px;

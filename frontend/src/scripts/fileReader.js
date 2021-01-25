@@ -11,11 +11,9 @@ export const CSVFileReader = (type, CSVHandlerPath) => {
             filters: [{name: "Comma Separated File (CSV)", extensions: ["csv"]}]
         }).then((response) => {
             if (!response.canceled) {  
-                console.log('reading file.. ', response.filePaths[0])              
-                execShellCommand(CSVHandlerPath, [
-                    type,
-                    response.filePaths[0]      
-                ])
+                const args = type.concat([response.filePaths[0]])
+                console.log('reading file.. ', args)  
+                execShellCommand(CSVHandlerPath, args)
                 .then(response => { console.log(response); resolve(response) })
                 //.catch(reject('na'))
             } else {
@@ -35,14 +33,10 @@ export const CSVFileWritter = (type, data, CSVHandlerPath) => {
             filters: [{name: 'Comma Separated File (CSV)', extensions: ['csv']},], 
             properties: [] 
         }).then((response) => {
-            if (!response.canceled) {  
-                console.log(type)              
-                execShellCommand(CSVHandlerPath, [        
-                    type,
-                    data,
-                    response.filePath.toString()                    
-                ])
-                .then(response => { console.log(response); resolve(response) })
+            if (!response.canceled) {
+                const args = type.concat(JSON.stringify({"data":data, "path":response.filePath.toString()}))              
+                execShellCommand(CSVHandlerPath, args)
+                .then(response => { console.log(response); resolve(response) })                
             } else {
                 reject();
             }
@@ -84,16 +78,15 @@ export const SystemFileWritter = (data) => {
             properties: [] 
         }).then((response) => {
             if (!response.canceled) {  
-
+                console.log(data)
                 const fs = window.require('fs');
-                fs.writeFile(response.filePath.toString(), data, (err,data) => {
+                fs.writeFileSync(response.filePath.toString(), data, (err,data) => {
                     if (err) {
                         reject(err)
                     }
                     resolve(data)
                   }
                 )
-
             } else {
                 reject();
             }

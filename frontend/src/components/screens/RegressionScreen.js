@@ -4,12 +4,15 @@ import Graph from '../Graph';
 import GraphB from '../GraphB';
 import GraphC from '../GraphC';
 import Selector from '../Selector'
+import EmptyEntity from '../EmptyEntity'
 
 import { ReactComponent as IconAdd} from '../../assets/icons/add.svg'
 import { ReactComponent as IconOpenFile} from '../../assets/icons/open-file.svg'
 import { ReactComponent as IconSaveFile} from '../../assets/icons/saving-disc.svg'
 import { ReactComponent as IconLink} from '../../assets/icons/foreign.svg'
 import { ReactComponent as IconCopy} from '../../assets/icons/copy.svg'
+import { ReactComponent as IconClear} from '../../assets/icons/reload.svg'
+import {CopyToClipboard} from 'react-copy-to-clipboard';
 
 
 import {execShellCommand} from '../../scripts/threader'
@@ -22,11 +25,6 @@ import Grid from '../Grid'
 //redux
 import { useSelector, useDispatch } from 'react-redux';
 import { addEntity, updateEntity, removeEntity, selectEntity } from '../../redux/actions/EntityActions'
-
-import { Redirect  } from 'react-router-dom';
-
-import { MathComponent } from 'mathjax-react'
-import { InlineMath, BlockMath } from 'react-katex';
 import { addNotification } from '../../redux/actions/NotificationActions';
 
 //CSV handler
@@ -38,24 +36,39 @@ const RegressionScreen = () => {
     const dispatch = useDispatch()
 
     const config = useSelector(state => state.ConfigReducer) 
+    const [isCalculating, SetIsCalculating] = useState(false)
 
+    const graphConfig = useSelector(state => state.GraphReducer)
+    const [graphRegion, setGraphRegion] = useState({
+        'domain': graphConfig.domain,
+        'range': graphConfig.range,
+    })
     //Get current active item index.
     const activeEnitiyIndex = getActiveEnitiyIndex(regressionEntities)
 
+    useEffect(()=>{
+        if (regressionEntities.length>0) {SetIsCalculating(false)}
+        else {SetIsCalculating(true)}    
+    },[regressionEntities])
+
+
     const addRegressionEnitiy = () => {
         return addEntity({            
-            'id': null,
+            'id': 1,
             'type':'regression',
-            'title': null,
+            'title': 'Example Reg Data 1',
             'colour': randomRGBA(),
             'data': [],
-            'analysis': {},
+            'analysis': {
+            },
             'elements': {
                 'lines': [],
                 'dots': [],
                 'areas': [],
-            },        'active':false,
-            'visible':true,        
+            },
+            'active':true,
+            'visible':true,
+            'analysed':false
         })
     }
 
@@ -75,25 +88,27 @@ const RegressionScreen = () => {
         ).then(response => {
             console.log(response)
             if (response.status && response.status == "good") {
+                const Syx = response.data.Syx
                 const data = [
                     [
                         {x:-10000, y:(response.data.b * -10000 + response.data.a)},
                         {x:10000, y:(response.data.b * 10000 + response.data.a)},
                     ],
                     [
-                        {x:-10000, y:(response.data.b * -10000 + response.data.a) + (2.16 * 0.8165) },
-                        {x:10000, y:(response.data.b * 10000 + response.data.a) + (2.16 * 0.8165) },
+                        {x:-10000, y:(response.data.b * -10000 + response.data.a) + (2.16 * Syx) },
+                        {x:10000, y:(response.data.b * 10000 + response.data.a) + (2.16 * Syx) },
                     ],
                     [
-                        {x:-10000, y:(response.data.b * -10000 + response.data.a) - (2.16 * 0.8165) },
-                        {x:10000, y:(response.data.b * 10000 + response.data.a) - (2.16 * 0.8165) },
+                        {x:-10000, y:(response.data.b * -10000 + response.data.a) - (2.16 * Syx) },
+                        {x:10000, y:(response.data.b * 10000 + response.data.a) - (2.16 * Syx) },
                     ],
                 ]
                 regressionEntities[activeEnitiyIndex].analysis = response.data
                 regressionEntities[activeEnitiyIndex].elements.lines = data
                 regressionEntities[activeEnitiyIndex].analysed = true
                 dispatch(updateEntity(regressionEntities[activeEnitiyIndex]))
-    
+                onRecalculate([-10000,10000],[])
+                //updateGraphRegion()
             }
         })
         
@@ -117,94 +132,125 @@ const RegressionScreen = () => {
 
     }
 
+    const updateGraphRegion = () => {
+        let dataArrayX = []
+        let dataArrayY = []
+        regressionEntities.forEach(entity => {
+            if (entity.visible && entity.data.length) {
+                entity.data.forEach(point => dataArrayX.push(point.x))
+                entity.data.forEach(point => dataArrayY.push(point.y))
+            }
+        })
+        const currentMaxX = Math.max(...dataArrayX)
+        const currentMaxY = Math.max(...dataArrayY)
+        const currentMinX = Math.min(...dataArrayX)  
+        const currentMinY = Math.min(...dataArrayY)  
+        //setGraphRegion
+
+        const newRegion = {
+            'domain': [currentMinX - (currentMaxX - currentMinX), currentMaxX + (currentMaxX - currentMinX)],
+            'range': [currentMinY * .5,currentMaxY * 1.5],
+        }
+        console.log(currentMinX, currentMaxX, newRegion)
+
+        setGraphRegion(newRegion)
+    }
+
+
 
     const onRecalculate = (rangeUpper, rangeLower) => {
         //console.log('new range upper..', rangeUpper,'new range lowers..', rangeLower)
-        if (regressionEntities[activeEnitiyIndex].analysed) {
-            const a = regressionEntities[activeEnitiyIndex].analysis.a
-            const b = regressionEntities[activeEnitiyIndex].analysis.b
-            const data = [
-             
-                [
-                    {x:rangeUpper[0], y:(b * rangeUpper[0] + a)},
-                    {x:rangeUpper[1], y:(b * rangeUpper[1] + a)},
-                ],
-                [
-                    {x:rangeUpper[0], y:(b * rangeUpper[0] + a) + (2.16 * 0.8165) },
-                    {x:rangeUpper[1], y:(b * rangeUpper[1] + a) + (2.16 * 0.8165) },
-                ],
-                [
-                    {x:rangeUpper[0], y:(b * rangeUpper[0] + a) - (2.16 * 0.8165) },
-                    {x:rangeUpper[1], y:(b * rangeUpper[1] + a) - (2.16 * 0.8165) },
-                ]
-            ]
-    
-            console.log(rangeUpper)
-            regressionEntities[activeEnitiyIndex].elements.lines = data
-            dispatch(updateEntity(regressionEntities[activeEnitiyIndex]))
+        if (regressionEntities[activeEnitiyIndex]) {
+            regressionEntities.forEach(regressionEntity => {
+                if(regressionEntity.analysed) {
+                    const a = regressionEntity.analysis.a
+                    const b = regressionEntity.analysis.b
+                    const Syx = regressionEntity.analysis.Syx
+                    const data = [
+                    
+                        [
+                            {x:rangeUpper[0], y:(b * rangeUpper[0] + a)},
+                            {x:rangeUpper[1], y:(b * rangeUpper[1] + a)},
+                        ],
+                        [
+                            {x:rangeUpper[0], y:(b * rangeUpper[0] + a) + (2.16 * Syx) },
+                            {x:rangeUpper[1], y:(b * rangeUpper[1] + a) + (2.16 * Syx) },
+                        ],
+                        [
+                            {x:rangeUpper[0], y:(b * rangeUpper[0] + a) - (2.16 * Syx) },
+                            {x:rangeUpper[1], y:(b * rangeUpper[1] + a) - (2.16 * Syx) },
+                        ]
+                    ]
+                    regressionEntity.elements.lines = data
+                    dispatch(updateEntity(regressionEntity))
+                }
+            })
+
         }
-
-
         //linegenerator(rangeUpper[0], rangeUpper[1])
     }
 
-    /*
-    const example = String.raw`\int_{-\infty}^{\infty}e^{-x^2}\ dx`;
-    <MathComponent className='testtt' tex={example} display={true} />
- 
-    <BlockMath
-        math={'\\int_0^\\infty x^2 dx \\inta'}
-        errorColor={'#cc0000'}
-    />
-    */
-    return (
-        <div className="page screen">
-            <div className="screen__panel">
-                <Selector 
-                    reducer={regressionEntities}
-                    actionSelect={selectEntity}
-                    actionEdit={updateEntity}
-                    actionRemove={removeEntity}
-                    actionAdd={addRegressionEnitiy}                
-                />
-                <Tab 
-                    tabs={[
-                        {
-                            'name':'Analysis',
-                            'component': <AnalysisTab/>,
-                        },
-                        {
-                            'name':'Data',
-                            'component': <DataTab/>,
-                        },
 
-                    ]}
+
+    return (
+        <div className="screen">
+            {
+                regressionEntities.length ? 
+                <div className="screen__panel">
+                    <Selector 
+                        reducer={regressionEntities}
+                        actionSelect={selectEntity}
+                        actionEdit={updateEntity}
+                        actionRemove={removeEntity}
+                        actionAdd={addRegressionEnitiy}                
+                    />
+                    <Tab 
+                        tabs={[
+                            {
+                                'name':'Analysis',
+                                'component': <AnalysisTab/>,
+                            },
+                            {
+                                'name':'Data',
+                                'component': <DataTab/>,
+                            },
+
+                        ]}
+                    />
+                    
+                    <button
+                        className={
+                            'screen__analyse-btn screen__analyse-btn--active'
+                        } 
+                        onClick={analyse}
+                    >Analyse</button>  
+                </div>
+                :
+                <EmptyEntity
+                    reducer={regressionEntities}
+                    actionAdd={addRegressionEnitiy}             
                 />
-                
-                <button
-                    className={regressionEntities[activeEnitiyIndex].analysed ?
-                        'screen__analyse-btn screen__analyse-btn--disabled' :
-                        'screen__analyse-btn screen__analyse-btn--active'
-                    } 
-                    onClick={analyse}
-                >Analyse</button>  
-            </div>
-            <div className="graph-screen__graph">
+            }
+            
+            <div className="screen__graph">
                 <GraphB
                     items = {regressionEntities}  
                     onRecalculate={onRecalculate}
-                    isCalculating={false}  
+                    isCalculating={isCalculating}
+                    activeDomainX={graphRegion.domain} 
+                    activeDomainY={graphRegion.range}
                 />
             </div>
         </div>
     )
 }
-
+//regressionEntities[activeEnitiyIndex].analysed ?'screen__analyse-btn screen__analyse-btn--disabled' :
 
 const AnalysisTab = () => {
 
     const regressionEntities = useSelector(state => state.EntityReducer).filter(entity => entity.type === 'regression') 
     const dispatch = useDispatch()
+    const config = useSelector(state => state.ConfigReducer)
 
     //Get current active item index.
     const activeEnitiyIndex = getActiveEnitiyIndex(regressionEntities)
@@ -213,14 +259,21 @@ const AnalysisTab = () => {
 
     let equation = null
     if (regressionEntities[activeEnitiyIndex].analysis.a && regressionEntities[activeEnitiyIndex].analysis.b) {
-        equation = `${round(regressionEntities[activeEnitiyIndex].analysis.a)}x+${round(regressionEntities[activeEnitiyIndex].analysis.b)}`
+        equation = `${round(config.TO_DP, regressionEntities[activeEnitiyIndex].analysis.b)}x+${round(config.TO_DP, regressionEntities[activeEnitiyIndex].analysis.a)}`
     }
 
     const createLineEntity = () => {
-        let newLine = templateLineEntity()
-        newLine.analysis.expression = `${round(regressionEntities[activeEnitiyIndex].analysis.a)}x+${round(regressionEntities[activeEnitiyIndex].analysis.b)}`
-        dispatch(addEntity(newLine))
-        dispatch(addNotification({"text":"Create new line item"}))
+        console.log(regressionEntities[activeEnitiyIndex].analysed)
+        if (regressionEntities[activeEnitiyIndex].analysed == true) {
+            console.log('hello??')
+            let newLine = templateLineEntity()
+            newLine.analysis.expression = `${round(config.TO_DP, regressionEntities[activeEnitiyIndex].analysis.b)}x+${round(config.TO_DP, regressionEntities[activeEnitiyIndex].analysis.a)}`
+            dispatch(addEntity(newLine))
+            dispatch(addNotification({"text":"Created new line item"}))
+        }
+        else { 
+            dispatch(addNotification({"text":"Please analyse data first"})) 
+        }
     }
 
     const getCI = () => {
@@ -245,48 +298,95 @@ const AnalysisTab = () => {
         console.log(lineLower, lineUpper)
     }
 
+    const onCopy = () => {
+        dispatch(addNotification({"text":"Copied","loader":false}))
+    }
+
     return (
         <div className="screen__panel-content">
-            <button onClick={getCI}>testss</button>
             <div className="info-item">
                 <label>Regression Line f(x):</label>    
-                <label className="label--text">{equation || "-"}</label>
+                <CopyToClipboard text={equation || "-"}> 
+                    <label className="label--text" onClick={onCopy}>{equation || "-"}<IconCopy/></label>
+                </CopyToClipboard>
             </div>
 
             <div className="center">
-                <NavLink to='/line'><IconLink className="icon-button" onClick={createLineEntity}/></NavLink>
+                <IconLink className="icon-button" onClick={createLineEntity}/>
             </div>
             <div className="info-item">
-                <label className="label--item">Corelation Coefficient (r)</label>    
-                <label className="label--text">{round(regressionEntities[activeEnitiyIndex].analysis.r) || "-"}<IconCopy/></label>
+                <label className="label--item">Corelation Coefficient (r):</label> 
+                <CopyToClipboard text={regressionEntities[activeEnitiyIndex].analysis.r || "-"}> 
+                    <label className="label--text" onClick={onCopy}>{round(config.TO_DP, regressionEntities[activeEnitiyIndex].analysis.r) || "-"}<IconCopy/></label>
+                </CopyToClipboard>
+
             </div>
             <div className="info-item">
-                <label className="label--item">R square (rr)</label>    
-                <label className="label--text">{round(regressionEntities[activeEnitiyIndex].analysis.rr) || "-"}<IconCopy/></label>
+                <label className="label--item">R square (rr):</label>  
+                <CopyToClipboard text={regressionEntities[activeEnitiyIndex].analysis.rr || "-"}>    
+                    <label className="label--text" onClick={onCopy}>{round(config.TO_DP, regressionEntities[activeEnitiyIndex].analysis.rr) || "-"}<IconCopy/></label>
+                </CopyToClipboard>
             </div>
             <div className="info-item">
-                <label className="label--item">Slope (b)</label>    
-                <label className="label--text">{round(regressionEntities[activeEnitiyIndex].analysis.b) + ' ± 1.43' || "-"}<IconCopy/></label>
+                <label className="label--item">Slope (b):</label>   
+                <CopyToClipboard text={
+                    regressionEntities[activeEnitiyIndex].analysis.b && regressionEntities[activeEnitiyIndex].analysis.Sb ?
+                    regressionEntities[activeEnitiyIndex].analysis.b + " ± " + regressionEntities[activeEnitiyIndex].analysis.Sb : "-"
+                }>  
+                    <label className="label--text" onClick={onCopy}>{
+                        regressionEntities[activeEnitiyIndex].analysis.b && regressionEntities[activeEnitiyIndex].analysis.Sb ?
+                        round(config.TO_DP, regressionEntities[activeEnitiyIndex].analysis.b) + " ± " + round(config.TO_DP, regressionEntities[activeEnitiyIndex].analysis.Sb) : "-"
+                    }<IconCopy/></label>
+                </CopyToClipboard>
             </div>
             <div className="info-item">
-                <label className="label--item">Y Intercept (a)</label>    
-                <label className="label--text">{round(regressionEntities[activeEnitiyIndex].analysis.a) || "-"}<IconCopy/></label>
+                <label className="label--item">Y Intercept (a):</label> 
+                <CopyToClipboard text={
+                    regressionEntities[activeEnitiyIndex].analysis.a && regressionEntities[activeEnitiyIndex].analysis.Sa ?
+                    regressionEntities[activeEnitiyIndex].analysis.a + " ± " + regressionEntities[activeEnitiyIndex].analysis.Sa : "-"
+                }>     
+                    <label className="label--text" onClick={onCopy}>{
+                        regressionEntities[activeEnitiyIndex].analysis.a && regressionEntities[activeEnitiyIndex].analysis.Sa ?
+                        round(config.TO_DP, regressionEntities[activeEnitiyIndex].analysis.a) + " ± " + round(config.TO_DP, regressionEntities[activeEnitiyIndex].analysis.Sa) : "-"
+                    }<IconCopy/></label>
+                </CopyToClipboard>
             </div>
             <div className="info-item">
-                <label className="label--item">X Intercept</label>    
-                <label className="label--text">{"-"}<IconCopy/></label>
+                <label className="label--item">X Intercept:</label>  
+                <CopyToClipboard text={regressionEntities[activeEnitiyIndex].analysis.xIntercept || "-"}>   
+                    <label className="label--text" onClick={onCopy}>{round(config.TO_DP, regressionEntities[activeEnitiyIndex].analysis.xIntercept) || "-"}<IconCopy/></label>
+                </CopyToClipboard>
             </div>
             <div className="info-item">
-                <label className="label--item">x-bar (x̅)</label>    
-                <label className="label--text">{round(regressionEntities[activeEnitiyIndex].analysis.xMean) || "-"}<IconCopy/></label>
+                <label className="label--item">x-bar (x̅):</label>    
+                <CopyToClipboard text={
+                    regressionEntities[activeEnitiyIndex].analysis.xMean && regressionEntities[activeEnitiyIndex].analysis.xMeanSE ?
+                    regressionEntities[activeEnitiyIndex].analysis.xMean + " ± " + regressionEntities[activeEnitiyIndex].analysis.xMeanSE : "-"
+                    
+                }>    
+                    <label className="label--text" onClick={onCopy}>{
+                        regressionEntities[activeEnitiyIndex].analysis.xMean && regressionEntities[activeEnitiyIndex].analysis.xMeanSE ?
+                        round(config.TO_DP, regressionEntities[activeEnitiyIndex].analysis.xMean) + " ± " + round(config.TO_DP, regressionEntities[activeEnitiyIndex].analysis.xMeanSE) : "-"
+                    }<IconCopy/></label>
+                </CopyToClipboard>
             </div>
             <div className="info-item">
-                <label className="label--item">y-bar (y̅)</label>    
-                <label className="label--text">{round(regressionEntities[activeEnitiyIndex].analysis.yMean) || "-"}<IconCopy/></label>
+                <label className="label--item">y-bar (y̅):</label>
+                <CopyToClipboard text={
+                    regressionEntities[activeEnitiyIndex].analysis.yMean && regressionEntities[activeEnitiyIndex].analysis.yMeanSE ?
+                    regressionEntities[activeEnitiyIndex].analysis.yMean + " ± " + regressionEntities[activeEnitiyIndex].analysis.yMeanSE : "-"
+                }>     
+                    <label className="label--text" onClick={onCopy}>{
+                        regressionEntities[activeEnitiyIndex].analysis.yMean && regressionEntities[activeEnitiyIndex].analysis.yMeanSE ?
+                        round(config.TO_DP, regressionEntities[activeEnitiyIndex].analysis.yMean) + " ± " + round(config.TO_DP, regressionEntities[activeEnitiyIndex].analysis.yMeanSE) : "-"
+                    }<IconCopy/></label>
+                </CopyToClipboard>
             </div>
             <div className="info-item">
-                <label className="label--item">Standard Error of Estimate (Syx)</label>    
-                <label className="label--text">{round(regressionEntities[activeEnitiyIndex].analysis.Syx) || "-"}<IconCopy/></label>
+                <label className="label--item">Standard Error of Estimate (Syx):</label>    
+                <CopyToClipboard text={regressionEntities[activeEnitiyIndex].analysis.Syx || "-"}>    
+                    <label className="label--text" onClick={onCopy}>{round(config.TO_DP, regressionEntities[activeEnitiyIndex].analysis.Syx) || "-"}<IconCopy/></label>
+                </CopyToClipboard>
             </div>
         </div>
     )
@@ -309,14 +409,23 @@ const DataTab = (props) => {
         dispatch(updateEntity(regressionEntities[activeEnitiyIndex]))
     }
 
-    const readFile = () => {
-        CSVFileReader(config.ACTION_READ_REGRESSION_FILE, config.CSVHandlerPath)
+    const readData = () => {
+
+        CSVFileReader(config.DataHandler.commands.read_regression, config.DataHandler.path)
         .then(response => {   
-            let points = []
-            response.data.forEach(point => { points.push(point) }) 
-            regressionEntities[activeEnitiyIndex].data = points
-            regressionEntities[activeEnitiyIndex].elements.dots = points
-            resetAnalysis()
+            if (response.status && response.status == "good") {
+                let points = response.data.map(point => {return {"x":point[0],"y":point[1]}})
+            
+                regressionEntities[activeEnitiyIndex].data = points
+                regressionEntities[activeEnitiyIndex].elements.dots = points
+                resetAnalysis()
+                dispatch(addNotification({"text":"Data imported", "loader":false}))
+
+            }
+            else if (response.status && response.status == "bad") {       
+                dispatch(addNotification({"text":"Could not import data", "loader":false}))
+         
+            }
         })
     }
 
@@ -333,43 +442,50 @@ const DataTab = (props) => {
         points[index] = data
         regressionEntities[activeEnitiyIndex].data = points
         regressionEntities[activeEnitiyIndex].elements.dots = points
+        dispatch(updateEntity(regressionEntities[activeEnitiyIndex]))
         resetAnalysis()
     }
 
     const saveData = () => {
-        CSVFileWritter(config.ACTION_WRITE_REGRESSION_FILE, regressionEntities[activeEnitiyIndex].data, config.CSVHandlerPath)
-        .then(response => { 
-            console.log(response)
+        let requestData = regressionEntities[activeEnitiyIndex].data.map(point => {
+            return [point.x, point.y]
         })
-    }
-
-    const removePoint = (index) => {
-
-        console.log('to remove..', index, regressionEntities[activeEnitiyIndex].data)
-        let points = []
-         //points = points.splice(1, 1)
-        regressionEntities[activeEnitiyIndex].data
-        .forEach((item, itemIndex) => {
-            if (itemIndex != index) {
-                console.log('keep..', item)
-                points.push(item)
+        console.log(requestData) 
+    
+        CSVFileWritter(config.DataHandler.commands.write_regression, requestData, config.DataHandler.path)
+        .then(response => { 
+            if (response.status && response.status == "good") {
+                dispatch(addNotification({"text":"Saved data", "loader":false}))
+            }
+            else if (response.status && response.status == "bad") {      
+                dispatch(addNotification({"text":"Couldn't saved data", "loader":false}))          
             }
         })
 
-        console.log('new points..', points)
-        regressionEntities[activeEnitiyIndex].data = points
-        regressionEntities[activeEnitiyIndex].elements.dots = points
-        regressionEntities[activeEnitiyIndex].analysed = false
+
+        
+    }
+
+    const clearData = () => {
+        regressionEntities[activeEnitiyIndex].data = []
         regressionEntities[activeEnitiyIndex].elements.dots = []
-        dispatch(updateEntity(regressionEntities[activeEnitiyIndex]))
+        resetAnalysis()
+    }
+
+    const removePoint = (index) => {
+        regressionEntities[activeEnitiyIndex].data.splice(index,1)
+        resetAnalysis()
     }
 
     
     return (
         <div className="screen__data">
             <div className="center">
-                <IconOpenFile className="icon-button" onClick={readFile}/>
-                <IconSaveFile className="icon-button" onClick={saveData}/>       
+                <div className="screen__controls">
+                    <IconOpenFile className="icon-button" onClick={readData}/>
+                    <IconClear className="icon-button" onClick={clearData}/>   
+                    <IconSaveFile className="icon-button" onClick={saveData}/>  
+                </div>     
             </div>
             <div className="regression__data">
                 <Grid headers={["X","Y"]} data={regressionEntities[activeEnitiyIndex].data} onChange={updatePoint} onRemove={removePoint}/>

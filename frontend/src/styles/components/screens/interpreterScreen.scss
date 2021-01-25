@@ -6,6 +6,21 @@
     width: 100%;
     //padding: 20px;
 
+    &__table {
+
+        & svg {
+            height: 15px;
+            width: 15px;
+            margin-right: 10px;
+            fill: $grey-darker;
+        }
+
+        & h2 {
+            font-size: 1.2rem;
+            color: $grey-darker;
+        }
+    }
+
     &__equation {
         //background-color: honeydew;
         padding: 20px;
@@ -27,6 +42,7 @@
     }
 
     &__input {
+        width: 95%;
         margin-top: 10px;
     }
 
@@ -98,7 +114,7 @@
     & p {
         font-size: 1rem;
         color: rgb(38, 62, 63);
-        letter-spacing: 10px;
+        //letter-spacing: 10px;
         text-align: center;
 
     }

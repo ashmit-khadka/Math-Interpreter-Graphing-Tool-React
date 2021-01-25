@@ -1,7 +1,7 @@
 
 .title-bar {
-    z-index: 4;
-    height: $title-bar-size;
+    //z-index: 4;
+    height: 100%;
     width: 100vw;
     display: flex;
     align-items: center;
@@ -26,7 +26,7 @@
             width: $title-bar-size;
             background-color: $grey-lighter;
             outline: none;
-            //cursor: pointer;
+            cursor: pointer;
 
             &:hover {           
                 background-color: $grey-medium;
@@ -100,5 +100,12 @@
         }  
     }
 
+  
+}
+
+.title-icon {
+
+    fill: orange;
+    width: 10px;
   
 }

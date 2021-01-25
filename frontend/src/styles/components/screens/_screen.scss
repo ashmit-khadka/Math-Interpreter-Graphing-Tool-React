@@ -1,6 +1,10 @@
 
 .screen {
-    display: flex;
+    max-height: 100%;
+    width: 100%;
+    display: grid;
+    grid-template-columns: [panel-start] 350px [panel-end graph-start] 1fr [graph-end];
+    grid-template-rows: calc(100vh - 50px);
 
     &__data {
         display: flex;
@@ -15,11 +19,12 @@
     }
 
     &__panel {
-        //padding: 20px 10px;
-        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+
         min-width: 350px;
         background-color: rgb(253, 253, 253);
-        margin-right: 0px;
         box-shadow: 0px 0px 15px 5px #e2e2e2;
         overflow: none;
         height: 100%;
@@ -28,7 +33,9 @@
 
     &__graph {
         //background-color: yellowgreen;
+        height: 100%;
         width: 100%;
+        //overflow: hidden;
     }
 
     &__header {
@@ -38,8 +45,9 @@
 
     &__analyse-btn {
         position: fixed;
-        bottom: 0;
+        bottom: 0px;
         left: $side-menu-size;
+        height: 40px;
         min-width: 350px;
         padding: 10px;
         outline: none;
@@ -63,6 +71,7 @@
 
     &__panel-content {
         padding: 10px;
+        //overflow-y: scroll;
     }
 
     &__section {
@@ -168,5 +177,33 @@
         align-items: center;
         gap: 10px;
         color: grey;
+    }
+}
+
+
+.empty-entity {
+    height: 90%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    color: grey;
+    
+
+    &__add {
+        height: 50px;
+        width: 50px;
+        fill: rgb(156, 156, 156);
+
+        &:hover {
+            //fill: $grey-dark;
+        }
+
+        &:active {
+            //fill: $grey-darker;
+        }
+
+
     }
 }

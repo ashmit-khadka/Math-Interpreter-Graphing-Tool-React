@@ -1,5 +1,6 @@
 .tabs {
-    height: 80%;
+    height: calc(100vh - 200px);
+
 
     &__header {
         display: flex;
@@ -20,9 +21,6 @@
 
 
 .tab {
-
-
-
     &__title {
         //width: 100%;
         display: flex;
@@ -70,46 +68,8 @@
 
 }
 
-.tab-item-list {
-    z-index: 5000;
-    position: fixed;
-    width: 50%;
-    height: 50%;
-    max-width: 500px;
-    background-color: white;
-    top: 50%;
-    left: 50%;
-    -webkit-transform: translate(-50%, -50%);
-    transform: translate(-50%, -50%);
-    
-}
 
 
-.tab-item {
-    
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-
-    &__detail,
-    &__control {
-        display: flex;
-        align-items: center;
-    
-    }
-
-    & h3 {
-        margin-left: 10px;
-    }
-
-    &:hover {
-        cursor: pointer;
-        background-color: $grey-light;
-    }
-    &:active {
-        background-color: $grey-medium;
-    }
-}
 
 .model {
     z-index: 5;

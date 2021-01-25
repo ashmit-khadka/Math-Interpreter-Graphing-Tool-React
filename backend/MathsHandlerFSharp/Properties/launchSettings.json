@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MathsHandlerFSharp": {
+      "commandName": "Project",
+      "commandLineArgs": "\"test\""
+    }
+  }
+}

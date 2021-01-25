@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Interpreter": {
+      "commandName": "Project",
+      "commandLineArgs": "\"parse\" \"[\\\"2*(x^^2)\\\"]"
+    }
+  }
+}

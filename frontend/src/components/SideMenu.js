@@ -17,17 +17,18 @@ const SideMenu = () => {
 	const lineEntities = entities.filter(entity => entity.type === 'polynomial').length
 	const regressionEntities = entities.filter(entity => entity.type === 'regression').length
 	const distributionEntities = entities.filter(entity => entity.type === 'distribution').length
+	const interpreterEntities = entities.filter(entity => entity.type === 'interpreter').length
 	
 	return (
-		<ul className='side-menu'>
-			<NavLink className="side-menu__icon" activeClassName="side-menu__icon--active" to="/" exact={true} ><li><IconHome/></li></NavLink>
-			<NavLink className="side-menu__icon" activeClassName="side-menu__icon--active" to="/calculator" exact={true} ><li><IconCalculator/></li></NavLink>
+		<div className='side-menu'>
+			<NavLink className="side-menu__icon" activeClassName="side-menu__icon--active" to="/" exact={true} ><li><IconCalculator/><div>{interpreterEntities}</div></li></NavLink>
 			<NavLink className="side-menu__icon" activeClassName="side-menu__icon--active" to="/line" exact={true}><li><IconChart/><div>{lineEntities}</div></li></NavLink>
 			<NavLink className="side-menu__icon" activeClassName="side-menu__icon--active" to="/regression" exact={true}><li><IconRegression/><div>{regressionEntities}</div></li></NavLink>
 			<NavLink className="side-menu__icon" activeClassName="side-menu__icon--active" to="/distrabution" exact={true}><li><IconGaussian/><div>{distributionEntities}</div></li></NavLink>
-			<NavLink className="side-menu__icon" activeClassName="side-menu__icon--active" to="/setting" exact={true}><li><IconSettings/></li></NavLink>
-		</ul>
+		</div>
 	)
 }
+//			<NavLink className="side-menu__icon" activeClassName="side-menu__icon--active" to="/" exact={true} ><li><IconHome/></li></NavLink>
+//			<NavLink className="side-menu__icon" activeClassName="side-menu__icon--active" to="/setting" exact={true}><li><IconSettings/></li></NavLink>
 
 export default SideMenu

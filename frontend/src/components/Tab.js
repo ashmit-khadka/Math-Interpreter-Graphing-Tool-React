@@ -37,18 +37,16 @@ const Tab = (props) => {
                     })
                 }
             </div>
-            <div className="tabs__content">
 
             {
                 //Display the active tab
                 tabs.map((tab, index) => {
                     if (tab.active) {
-                        return <div key={index} className='tabs__tab'>{tab.component}</div>
+                        return <div key={index} className='tabs__content'>{tab.component}</div>
 
                     }
                 })
             }
-            </div>
 
         </div>
     )

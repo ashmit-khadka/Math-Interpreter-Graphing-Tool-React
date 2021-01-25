@@ -4,9 +4,9 @@ import { setNotification } from '../redux/actions/NotificationActions'
 
 export const randomRGBA = () => {
     return {
-        r: Math.floor(Math.random() * 255) + 50,
-        g: Math.floor(Math.random() * 255) + 50,
-        b: Math.floor(Math.random() * 255) + 50, 
+        r: Math.floor(Math.random() * 150) + 50,
+        g: Math.floor(Math.random() * 150) + 50,
+        b: Math.floor(Math.random() * 150) + 50, 
         a: 1 
     }
 }
@@ -19,9 +19,9 @@ export const copyToClipboard = (e) => {
     document.execCommand("copy");
 }
 
-export const round = (number) => {
+export const round = (dp, number) => {
     if (number)
-        return Number.parseFloat(number).toPrecision(4);
+        return +Number.parseFloat(number).toFixed(dp);
     return '-'
 }
 

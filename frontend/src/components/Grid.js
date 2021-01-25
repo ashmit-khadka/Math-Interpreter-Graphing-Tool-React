@@ -21,7 +21,7 @@ const GridRow = (props) => {
     let fields = []
     for (const [key, value] of Object.entries(props.data)) {
         fields.push(
-            <div key={props.id} className={"grid-row__cell"}>
+            <div key={`${props.id}-${key}`} className={"grid-row__cell"}>
                 <input  id={`gr-${props.id}-${key}`} className="" type="number" value={value} onChange={onChange}></input>
             </div>
         )
@@ -39,8 +39,6 @@ const GridRow = (props) => {
 }
 
 const Grid = (props) => {
-
-
 
     return (
         <div>
